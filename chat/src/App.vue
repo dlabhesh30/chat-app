@@ -86,23 +86,23 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, nextTick, onMounted, watch } from 'vue'
 import { Button } from 'primevue/button'
 import { Textarea } from 'primevue/textarea'
 import { Checkbox } from 'primevue/checkbox'
-import { createMessage, validateUserInput } from './types/chat.js'
-import { renderMarkdown, formatTimestamp } from './utils/markdown.js'
+import { createMessage, validateUserInput, type Message, type Sender } from './types/chat'
+import { renderMarkdown, formatTimestamp } from './utils/markdown'
 
 // Reactive state
-const messages = ref([])
-const newMessage = ref('')
-const isLoading = ref(false)
-const isMarkdownEnabled = ref(true)
-const messagesContainer = ref(null)
+const messages = ref<Message[]>([])
+const newMessage = ref<string>('')
+const isLoading = ref<boolean>(false)
+const isMarkdownEnabled = ref<boolean>(true)
+const messagesContainer = ref<HTMLElement | null>(null)
 
 // Sample messages for demonstration
-const sampleMessages = [
+const sampleMessages: Message[] = [
   createMessage('# Welcome to Vue 3 Chat! 👋\n\nThis chat supports **markdown** formatting.', 'other'),
   createMessage('Hello! I can use **bold text**, *italic text*, and `code snippets`.', 'user'),
   createMessage('That\'s great! Here\'s a code block:\n\n```javascript\nconst greeting = "Hello World!";\nconsole.log(greeting);\n```', 'other'),
@@ -125,7 +125,7 @@ watch(messages, () => {
 }, { deep: true })
 
 // Send message function
-const sendMessage = async () => {
+const sendMessage = async (): Promise<void> => {
   const trimmedMessage = newMessage.value.trim()
   if (!trimmedMessage || isLoading.value) return
 
@@ -152,7 +152,7 @@ const sendMessage = async () => {
   
   // Simulate response delay
   setTimeout(() => {
-    const responses = [
+    const responses: string[] = [
       'Thanks for your message! I can see you\'re using **markdown** formatting.',
       'Great! Here\'s a helpful tip:\n\n> You can use markdown to format your messages with **bold**, *italic*, `code`, and more!',
       'I can also help with:\n\n- **Lists**\n- `Code snippets`\n- [Links](https://example.com)\n- And much more!',
@@ -169,7 +169,7 @@ const sendMessage = async () => {
 }
 
 // Scroll to bottom of messages
-const scrollToBottom = () => {
+const scrollToBottom = (): void => {
   if (messagesContainer.value) {
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
   }
