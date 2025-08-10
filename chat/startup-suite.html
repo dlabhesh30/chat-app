@@ -829,12 +829,18 @@
       .progress-overview { grid-template-columns: 1fr; }
       .input-section { flex-direction: column; }
       .message { max-width: 95%; }
+      .header-left { 
+        flex-direction: column; 
+        align-items: flex-start;
+        gap: 8px; 
+      }
+      .header-right { margin-top: 8px; }
       .chat-controls { 
         flex-direction: column; 
         gap: 12px; 
         align-items: stretch; 
       }
-      .active-personas { justify-content: center; }
+      .persona-selector { width: 100%; }
       .chat-actions { justify-content: center; }
       .persona-header { 
         flex-direction: column; 
@@ -1346,7 +1352,11 @@
     
     function modifyAndResend() {
       workflowInterrupted = false;
-      byId('interrupt-controls').style.display = 'none';
+      
+      // Reset interrupt button
+      byId('interrupt-icon').textContent = '⏸️';
+      byId('interrupt-text').textContent = 'Interrupt';
+      byId('btn-interrupt').title = 'Interrupt current work';
       
       // Reset all personas to idle and clear chat
       selectedPersonas.forEach(pid => {
