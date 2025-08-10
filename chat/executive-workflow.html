@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StartupSuite – Executive Workflow</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; overflow-x: hidden; }
+    .app-container { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 280px; background: white; border-right: 1px solid #e0e6ed; padding: 20px 0; overflow-y: auto; }
+    .sidebar-header { padding: 0 20px 20px; border-bottom: 1px solid #e0e6ed; margin-bottom: 20px; }
+    .sidebar-header h2 { font-size: 1.2rem; color: #1a1a1a; margin-bottom: 5px; }
+    .sidebar-nav { padding: 0 10px; }
+    .nav-item { display: flex; align-items: center; padding: 12px 15px; margin: 5px 0; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; color: #6b7280; font-size: 0.9rem; }
+    .nav-item:hover { background: #f3f4f6; color: #374151; }
+    .nav-item.active { background: #f0f4ff; color: #4f46e5; border-left: 3px solid #4f46e5; }
+
+    .persona-list { margin-top: 20px; padding: 0 10px; }
+    .persona-sidebar-item { display: flex; align-items: center; padding: 10px 15px; margin: 5px 0; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; position: relative; }
+    .persona-sidebar-item:hover { background: #f9fafb; }
+    .persona-sidebar-item.active { background: #f0f4ff; }
+    .persona-avatar { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.8rem; margin-right: 12px; }
+    .persona-info { flex: 1; }
+    .persona-name { font-size: 0.9rem; font-weight: 500; color: #1f2937; margin-bottom: 2px; }
+    .persona-status { font-size: 0.75rem; color: #6b7280; }
+    .status-indicator { width: 8px; height: 8px; border-radius: 50%; position: absolute; top: 8px; right: 10px; }
+    .status-working { background: #fbbf24; }
+    .status-complete { background: #10b981; }
+    .status-waiting { background: #ef4444; }
+    .status-idle { background: #9ca3af; }
+
+    /* Main */
+    .main-content { flex: 1; display: flex; flex-direction: column; }
+    .top-header { background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); color: white; padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+    .top-header h1 { font-size: 1.25rem; font-weight: 600; margin-right: auto; }
+    .header-toolbar { display: flex; align-items: center; gap: 12px; }
+    .header-select { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 10px; border-radius: 8px; font-size: 0.9rem; }
+    .header-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease; }
+    .header-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+    .content-area { flex: 1; padding: 24px; overflow-y: auto; }
+    .view-container { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); min-height: calc(100vh - 140px); }
+    .view { display: none; padding: 24px; }
+    .view.active { display: block; }
+
+    .welcome-section { text-align: center; padding: 60px 40px; }
+    .welcome-section h2 { color: #1f2937; font-size: 2rem; font-weight: 600; margin-bottom: 10px; }
+    .welcome-section p { font-size: 1.05rem; color: #e5e7eb; }
+
+    /* Buttons */
+    .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; font-weight: 600; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); }
+    .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-secondary { background: #6c757d; }
+    .btn-danger { background: #dc3545; }
+
+    /* Chat */
+    .chat-interface { background: #f8f9fa; border-radius: 15px; padding: 20px; margin: 10px 0 20px; }
+    .team-info { background: #e3f2fd; border-radius: 10px; padding: 12px; margin-bottom: 12px; display: none; }
+    .team-info h4 { color: #1976d2; margin-bottom: 8px; }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { background: #1976d2; color: white; padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; cursor: pointer; }
+    .chip.secondary { background: #6b7280; }
+    .chat-messages { max-height: 460px; overflow-y: auto; background: white; border-radius: 10px; padding: 16px; margin: 16px 0; border: 1px solid #e1e5e9; }
+    .message { margin-bottom: 14px; padding: 12px; border-radius: 10px; }
+    .message.user { background: #e3f2fd; margin-left: 50px; }
+    .message.ai { background: #f3e5f5; margin-right: 50px; }
+    .message.system { background: #e8f5e8; text-align: center; font-style: italic; }
+    .message-header { font-weight: 700; margin-bottom: 6px; color: #333; }
+    .markdown { line-height: 1.55; }
+    .markdown pre { background: #0f172a; color: #e2e8f0; padding: 10px; border-radius: 8px; overflow: auto; }
+    .input-section { display: flex; gap: 12px; margin-top: 10px; }
+    .input-section textarea { flex: 1; padding: 12px; border: 2px solid #e1e5e9; border-radius: 10px; font-family: inherit; font-size: 1rem; resize: vertical; min-height: 60px; }
+    .input-section textarea:focus { outline: none; border-color: #667eea; }
+
+    /* Persona view */
+    .persona-view { padding: 0; }
+    .persona-header { background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); padding: 18px 22px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 12px; }
+    .persona-header .persona-avatar { width: 44px; height: 44px; font-size: 1.1rem; }
+    .persona-details h3 { color: #1f2937; font-size: 1.15rem; font-weight: 600; margin-bottom: 4px; }
+    .persona-details p { color: #6b7280; font-size: 0.9rem; }
+    .persona-content { padding: 20px; }
+
+    /* Deliverables */
+    .deliverables-section { margin-top: 10px; }
+    .deliverables-section h4 { color: #1f2937; font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
+    .deliverables-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .deliverable-item { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }
+    .deliverable-item h5 { color: #374151; font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+    .deliverable-item p { color: #6b7280; font-size: 0.86rem; line-height: 1.4; margin-bottom: 8px; }
+    .deliverable-actions { display: flex; gap: 8px; }
+
+    /* Progress */
+    .progress-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 10px 0 16px; }
+    .progress-card { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px; cursor: pointer; transition: all 0.2s ease; position: relative; }
+    .progress-card:hover { border-color: #8b5cf6; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1); }
+    .progress-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .progress-card h4 { color: #1f2937; font-size: 1rem; font-weight: 600; margin: 0; }
+    .progress-percentage { color: #6b7280; font-size: 0.9rem; margin-left: auto; }
+    .progress-bar { background: #e1e5e9; height: 8px; border-radius: 4px; overflow: hidden; }
+    .progress-fill { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; transition: width 0.3s ease; }
+
+    /* Modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 50; }
+    .modal { background: white; width: min(920px, 92vw); max-height: 88vh; overflow: auto; border-radius: 12px; padding: 18px; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+
+    /* Project create/edit */
+    .form-row { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+    .form-row input[type="text"], .form-row select { flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; }
+    .personas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .persona-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; text-align: center; cursor: pointer; background: white; transition: all 0.2s ease; }
+    .persona-card:hover { border-color: #8b5cf6; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15); }
+    .persona-card.selected { border-color: #8b5cf6; background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%); }
+
+    @media (max-width: 768px) {
+      .input-section { flex-direction: column; }
+      .message.user { margin-left: 20px; }
+      .message.ai { margin-right: 20px; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>StartupSuite</h2>
+        <p style="color: #6b7280; font-size: 0.8rem;">Personas</p>
+      </div>
+      <div class="sidebar-nav">
+        <div class="nav-item active" data-view="overview">📊 Executive Dashboard</div>
+        <div class="nav-item" data-view="chat">💬 Executive Chat</div>
+      </div>
+      <div class="persona-list" id="persona-sidebar"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="top-header">
+        <h1 id="view-title">Executive Dashboard</h1>
+        <div class="header-toolbar">
+          <select class="header-select" id="project-select" title="Select project">
+            <option value="">No project selected</option>
+          </select>
+          <button class="header-btn" id="btn-new-project">New Project</button>
+          <button class="header-btn" id="btn-edit-project" style="display:none;">Update Team</button>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <div class="view-container">
+          <!-- Overview -->
+          <div class="view active" id="overview-view">
+            <div class="welcome-section" id="welcome-section">
+              <h2>Welcome to Your AI Team</h2>
+              <p style="color:#6b7280; margin: 8px 0 18px;">Create a project to assemble your team and get started.</p>
+              <div style="text-align:center; margin-top: 10px;">
+                <button class="btn" id="btn-create-project">Create Project</button>
+              </div>
+            </div>
+            <div id="dashboard-section" style="display:none;">
+              <h3 style="color:#1f2937; margin-bottom: 10px;">Project Progress</h3>
+              <div class="progress-overview" id="progress-overview"></div>
+              <div class="deliverables-section">
+                <h4>Latest Deliverables</h4>
+                <div class="deliverables-list" id="dashboard-deliverables"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat -->
+          <div class="view" id="chat-view">
+            <div class="chat-interface">
+              <div class="team-info" id="team-info">
+                <h4>Selected Team</h4>
+                <div class="chip-row" id="selected-team-chips"></div>
+              </div>
+              <div class="chat-messages" id="chat-messages">
+                <div class="message system"><div class="message-header">System</div>Welcome! Select or create a project to begin.</div>
+              </div>
+              <div class="input-section">
+                <textarea id="executive-input" placeholder="Describe your idea or project..."></textarea>
+                <button class="btn" id="btn-send">Send</button>
+              </div>
+            </div>
+
+            <div class="deliverables-section" id="chat-deliverables-section" style="display:none;">
+              <h4>Deliverables</h4>
+              <div class="deliverables-list" id="chat-deliverables"></div>
+            </div>
+          </div>
+
+          <!-- Persona detail views mount here -->
+          <div id="persona-views"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project Modal -->
+  <div class="modal-backdrop" id="project-modal-backdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="project-modal-title">Create Project</h3>
+        <button class="btn-secondary btn" id="project-modal-close">Close</button>
+      </div>
+      <div class="form-row">
+        <label for="project-name" style="min-width:110px; color:#374151; font-weight:600;">Project name</label>
+        <input id="project-name" type="text" placeholder="e.g., Apollo Launch" />
+      </div>
+      <div class="form-row" style="align-items:flex-start;">
+        <div style="min-width:110px; color:#374151; font-weight:600; padding-top:6px;">Assemble team</div>
+        <div style="flex:1;">
+          <div class="personas-grid" id="modal-personas-grid"></div>
+          <div style="margin-top:10px; text-align:right;">
+            <button class="btn" id="project-modal-save">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deliverable Modal -->
+  <div class="modal-backdrop" id="deliverable-modal-backdrop" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="deliverable-modal-title">Deliverable</h3>
+        <button class="btn-secondary btn" id="deliverable-modal-close">Close</button>
+      </div>
+      <div id="deliverable-modal-content" class="markdown"></div>
+    </div>
+  </div>
+
+  <script>
+    // Personas configuration
+    const personas = {
+      'executive': { name: 'Executive', description: 'Strategic vision and oversight', color: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', shortName: 'EX' },
+      'product-manager': { name: 'Product Manager', description: 'Market research and product requirements', color: 'linear-gradient(135deg, #06b6d4, #0891b2)', shortName: 'PM' },
+      'solution-architect': { name: 'Solution Architect', description: 'Technical design and architecture', color: 'linear-gradient(135deg, #10b981, #059669)', shortName: 'SA' },
+      'program-manager': { name: 'Program Manager', description: 'Project planning and coordination', color: 'linear-gradient(135deg, #f59e0b, #d97706)', shortName: 'PGM' },
+      'design-buddy': { name: 'Design Buddy', description: 'User experience and design', color: 'linear-gradient(135deg, #ec4899, #db2777)', shortName: 'DB' }
+    };
+
+    // State
+    let projects = []; // { id, name, team: [personaIds], chat: [{sender, type, md}], deliverables: {personaId: [{id,title,md,ts}]}, progress: {personaId:number} }
+    let currentProjectId = '';
+
+    // DOM util
+    function byId(id) { return document.getElementById(id); }
+    function setVisible(el, show) { el.style.display = show ? '' : 'none'; }
+
+    // Markdown render util
+    function renderMarkdown(md) {
+      const raw = marked.parse(md, { breaks: true });
+      return DOMPurify.sanitize(raw);
+    }
+
+    // Chat helpers
+    function addMessage(sender, mdContent, type = 'ai') {
+      const chatMessages = byId('chat-messages');
+      const message = document.createElement('div');
+      message.className = `message ${type}`;
+      const safe = renderMarkdown(mdContent);
+      message.innerHTML = `<div class="message-header">${sender}</div><div class="markdown">${safe}</div>`;
+      chatMessages.appendChild(message); chatMessages.scrollTop = chatMessages.scrollHeight;
+      const proj = getCurrentProject();
+      if (proj) {
+        proj.chat.push({ sender, type, md: mdContent });
+      }
+    }
+
+    // Views
+    function showView(view) {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.view === view));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      if (view === 'overview') { byId('overview-view').classList.add('active'); byId('view-title').textContent = 'Executive Dashboard'; }
+      if (view === 'chat') { byId('chat-view').classList.add('active'); byId('view-title').textContent = 'Executive Chat'; }
+      updateDashboardVisibility();
+    }
+
+    // Sidebar personas
+    function renderSidebar() {
+      const container = byId('persona-sidebar');
+      container.innerHTML = Object.keys(personas).map(pid => {
+        const p = personas[pid];
+        return `
+          <div class="persona-sidebar-item" data-persona="${pid}">
+            <div class="persona-avatar" style="background:${p.color};">${p.shortName}</div>
+            <div class="persona-info">
+              <div class="persona-name">${p.name}</div>
+              <div class="persona-status" id="${pid}-status">Ready</div>
+            </div>
+            <div class="status-indicator status-idle" id="${pid}-indicator"></div>
+          </div>`;
+      }).join('');
+      container.querySelectorAll('.persona-sidebar-item').forEach(el => {
+        el.addEventListener('click', () => openPersonaView(el.dataset.persona));
+      });
+    }
+
+    // Project selector
+    function renderProjectSelector() {
+      const sel = byId('project-select');
+      const current = currentProjectId;
+      sel.innerHTML = `<option value="">No project selected</option>` +
+        projects.map(p => `<option value="${p.id}" ${p.id===current?'selected':''}>${p.name}</option>`).join('');
+      byId('btn-edit-project').style.display = current ? '' : 'none';
+      // team chips
+      const proj = getCurrentProject();
+      if (proj) {
+        byId('selected-team-chips').innerHTML = proj.team.map(pid => `<span class="chip" style="background:#667eea">${personas[pid].name}</span>`).join('');
+        setVisible(byId('team-info'), true);
+      } else {
+        byId('selected-team-chips').innerHTML = '';
+        setVisible(byId('team-info'), false);
+      }
+      updateDashboardVisibility();
+      renderDashboardCards();
+      renderChatFromProject();
+      renderChatDeliverables();
+    }
+
+    function updateDashboardVisibility() {
+      const hasProject = Boolean(currentProjectId);
+      setVisible(byId('welcome-section'), !hasProject);
+      setVisible(byId('dashboard-section'), hasProject);
+    }
+
+    function getCurrentProject() { return projects.find(p => p.id === currentProjectId); }
+
+    function createProject(name, team) {
+      const id = 'proj-' + Math.random().toString(36).slice(2, 9);
+      const progress = {}; team.forEach(pid => progress[pid] = 0);
+      const deliverables = {}; team.forEach(pid => deliverables[pid] = []);
+      const proj = { id, name, team: [...team], chat: [], deliverables, progress };
+      projects.push(proj); currentProjectId = id; renderProjectSelector(); simulateKickoff();
+    }
+
+    function editProjectTeam(team) {
+      const proj = getCurrentProject(); if (!proj) return;
+      proj.team = [...team];
+      // ensure progress/deliverables keys exist
+      const newProgress = {}; team.forEach(pid => newProgress[pid] = proj.progress[pid] || 0);
+      const newDeliverables = {}; team.forEach(pid => newDeliverables[pid] = proj.deliverables[pid] || []);
+      proj.progress = newProgress; proj.deliverables = newDeliverables;
+      renderProjectSelector();
+    }
+
+    // Dashboard rendering
+    function renderDashboardCards() {
+      const proj = getCurrentProject();
+      const container = byId('progress-overview');
+      container.innerHTML = '';
+      if (!proj) return;
+      proj.team.forEach(pid => {
+        const p = personas[pid];
+        const card = document.createElement('div'); card.className = 'progress-card'; card.onclick = () => openPersonaView(pid);
+        card.innerHTML = `
+          <div class="progress-card-header">
+            <div class="persona-avatar" style="background:${p.color};">${p.shortName}</div>
+            <h4>${p.name}</h4>
+            <div class="progress-percentage">${proj.progress[pid] || 0}%</div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${proj.progress[pid] || 0}%"></div></div>`;
+        container.appendChild(card);
+      });
+      // latest deliverables
+      const dwrap = byId('dashboard-deliverables');
+      dwrap.innerHTML = '';
+      const items = [];
+      if (proj) {
+        proj.team.forEach(pid => {
+          (proj.deliverables[pid] || []).slice(-2).forEach(d => items.push({ ...d, pid }));
+        });
+      }
+      items.sort((a,b) => (b.ts||0) - (a.ts||0));
+      dwrap.innerHTML = items.map(d => `
+        <div class="deliverable-item">
+          <h5>${d.title}</h5>
+          <p>By ${personas[d.pid].name}</p>
+          <div class="deliverable-actions">
+            <button class="btn" data-open-deliverable data-pid="${d.pid}" data-id="${d.id}">Open</button>
+          </div>
+        </div>`).join('');
+      dwrap.querySelectorAll('[data-open-deliverable]').forEach(btn => btn.addEventListener('click', () => openDeliverable(btn.dataset.pid, btn.dataset.id)));
+    }
+
+    // Chat
+    function renderChatFromProject() {
+      const proj = getCurrentProject();
+      const cm = byId('chat-messages');
+      cm.innerHTML = '';
+      if (!proj) {
+        cm.innerHTML = '<div class="message system"><div class="message-header">System</div>Select or create a project to begin.</div>';
+        return;
+      }
+      if (proj.chat.length === 0) {
+        cm.innerHTML = '<div class="message system"><div class="message-header">System</div>Project ready. Share your idea to start.</div>';
+      } else {
+        proj.chat.forEach(m => {
+          const div = document.createElement('div');
+          div.className = `message ${m.type}`;
+          div.innerHTML = `<div class="message-header">${m.sender}</div><div class="markdown">${renderMarkdown(m.md)}</div>`;
+          cm.appendChild(div);
+        });
+        cm.scrollTop = cm.scrollHeight;
+      }
+    }
+
+    function renderChatDeliverables() {
+      const proj = getCurrentProject(); const sec = byId('chat-deliverables-section'); const list = byId('chat-deliverables');
+      if (!proj) { setVisible(sec, false); list.innerHTML=''; return; }
+      const items = [];
+      proj.team.forEach(pid => (proj.deliverables[pid]||[]).forEach(d => items.push({ ...d, pid })));
+      setVisible(sec, items.length > 0);
+      list.innerHTML = items.map(d => `
+        <div class="deliverable-item">
+          <h5>${d.title}</h5>
+          <p>By ${personas[d.pid].name}</p>
+          <div class="deliverable-actions">
+            <button class="btn" data-open-deliverable data-pid="${d.pid}" data-id="${d.id}">Open</button>
+          </div>
+        </div>`).join('');
+      list.querySelectorAll('[data-open-deliverable]').forEach(btn => btn.addEventListener('click', () => openDeliverable(btn.dataset.pid, btn.dataset.id)));
+    }
+
+    // Persona Views
+    function openPersonaView(personaId) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      const p = personas[personaId];
+      let view = byId(`${personaId}-persona-view`);
+      if (!view) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'view persona-view';
+        wrapper.id = `${personaId}-persona-view`;
+        wrapper.innerHTML = `
+          <div class="persona-header">
+            <div class="persona-avatar" style="background:${p.color};">${p.shortName}</div>
+            <div class="persona-details"><h3>${p.name}</h3><p>${p.description}</p></div>
+          </div>
+          <div class="persona-content">
+            <div class="chat-messages" id="${personaId}-chat"></div>
+            <div class="deliverables-section">
+              <h4>Deliverables</h4>
+              <div class="deliverables-list" id="${personaId}-deliverables"></div>
+            </div>
+          </div>`;
+        byId('persona-views').appendChild(wrapper);
+      }
+      byId(`${personaId}-persona-view`).classList.add('active');
+      byId('view-title').textContent = p.name;
+      renderPersonaChat(personaId);
+      renderPersonaDeliverables(personaId);
+    }
+
+    function renderPersonaChat(personaId) {
+      const proj = getCurrentProject(); if (!proj) return;
+      const container = byId(`${personaId}-chat`); if (!container) return;
+      container.innerHTML = '';
+      proj.chat.filter(m => m.sender === personas[personaId].name || m.sender === 'You').forEach(m => {
+        const div = document.createElement('div');
+        div.className = `message ${m.type}`;
+        div.innerHTML = `<div class="message-header">${m.sender}</div><div class="markdown">${renderMarkdown(m.md)}</div>`;
+        container.appendChild(div);
+      });
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function renderPersonaDeliverables(personaId) {
+      const proj = getCurrentProject(); if (!proj) return;
+      const container = byId(`${personaId}-deliverables`); if (!container) return;
+      container.innerHTML = (proj.deliverables[personaId]||[]).map(d => `
+        <div class="deliverable-item">
+          <h5>${d.title}</h5>
+          <div class="deliverable-actions">
+            <button class="btn" data-open-deliverable data-pid="${personaId}" data-id="${d.id}">Open</button>
+          </div>
+        </div>`).join('');
+      container.querySelectorAll('[data-open-deliverable]').forEach(btn => btn.addEventListener('click', () => openDeliverable(btn.dataset.pid, btn.dataset.id)));
+    }
+
+    // Deliverable modal
+    function openDeliverable(pid, delivId) {
+      const proj = getCurrentProject(); if (!proj) return;
+      const d = (proj.deliverables[pid]||[]).find(x => x.id === delivId);
+      if (!d) return;
+      byId('deliverable-modal-title').textContent = `${d.title} · ${personas[pid].name}`;
+      byId('deliverable-modal-content').innerHTML = renderMarkdown(d.md);
+      showDeliverableModal(true);
+    }
+    function showDeliverableModal(show) {
+      byId('deliverable-modal-backdrop').style.display = show ? 'flex' : 'none';
+    }
+
+    // Project modal (Create/Edit)
+    function openProjectModal(edit = false) {
+      byId('project-modal-title').textContent = edit ? 'Update Project' : 'Create Project';
+      const proj = getCurrentProject();
+      byId('project-name').value = edit && proj ? proj.name : '';
+      const selected = edit && proj ? new Set(proj.team) : new Set();
+      renderModalPersonasGrid(selected);
+      showProjectModal(true);
+    }
+    function renderModalPersonasGrid(selectedSet) {
+      const grid = byId('modal-personas-grid');
+      grid.innerHTML = Object.keys(personas).filter(pid => pid !== 'executive').map(pid => {
+        const p = personas[pid]; const sel = selectedSet.has(pid) ? 'selected' : '';
+        return `
+          <div class="persona-card ${sel}" data-persona="${pid}">
+            <div class="persona-avatar" style="background:${p.color}; width:42px; height:42px; margin:0 auto 8px; font-size:1.05rem;">${p.shortName}</div>
+            <h4 style="font-size:1rem; margin-bottom:4px;">${p.name}</h4>
+            <p style="font-size:0.88rem; color:#6b7280;">${p.description}</p>
+          </div>`;
+      }).join('');
+      grid.querySelectorAll('.persona-card').forEach(card => card.addEventListener('click', () => {
+        card.classList.toggle('selected');
+      }));
+    }
+    function getSelectedTeamFromModal() {
+      return Array.from(byId('modal-personas-grid').querySelectorAll('.persona-card.selected')).map(el => el.dataset.persona);
+    }
+    function showProjectModal(show) { byId('project-modal-backdrop').style.display = show ? 'flex' : 'none'; }
+
+    // Simulated workflow
+    function simulateKickoff() {
+      const proj = getCurrentProject(); if (!proj) return;
+      addMessage('System', `Project "${proj.name}" created. Your team is ready.`, 'system');
+    }
+
+    function submitExecutiveIdea() {
+      const input = byId('executive-input'); const idea = input.value.trim(); if (!idea) return;
+      const proj = getCurrentProject(); if (!proj) { addMessage('System', 'Please select or create a project first.', 'system'); return; }
+      addMessage('You', idea, 'user'); input.value = '';
+      // Simulate persona responses with markdown and deliverables
+      setTimeout(() => simulateTeamWork(idea), 700);
+    }
+
+    function simulateTeamWork(idea) {
+      const proj = getCurrentProject(); if (!proj) return;
+      const steps = {
+        'product-manager': {
+          md: `I will perform market research for: ${idea}\n\n- Collect user needs\n- Analyze competitors\n- Draft PRD outline`,
+          deliverable: { title: 'Market Research Brief', md: `# Market Research Brief\n\n## Summary\n- Opportunity: ${idea}\n- Target users: ...\n\n## Competitors\n1. A\n2. B\n\n## Next Steps\n- Validate assumptions\n- Draft PRD` }
+        },
+        'solution-architect': {
+          md: `Based on early requirements, here is a draft architecture:\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n- Use microservices\n- PostgreSQL for storage\n- Queue for async jobs\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nExample config:\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n`,
+          deliverable: { title: 'Architecture Overview', md: `# Architecture Overview\n\n- Services: api, worker, web\n- DB: Postgres\n- Messaging: NATS\n\n\n\n\n\nDiagram (pseudo):\n\n\n\n\n\n\n\n\n\n\n\n\n` }
+        },
+        'program-manager': {
+          md: `I'll create a delivery plan and break down the work into milestones.\n\n- Milestone 1: Discovery\n- Milestone 2: MVP\n- Milestone 3: Beta`,
+          deliverable: { title: 'Initial Project Plan', md: `# Initial Project Plan\n\n## Milestones\n1. Discovery\n2. MVP\n3. Beta\n\n## Risks\n- Scope creep\n- Resource constraints` }
+        },
+        'design-buddy': {
+          md: `I'll start UX exploration.\n\n- User flows\n- Wireframes\n\nHere is a markdown checklist:\n\n- [ ] Happy path\n- [ ] Edge cases`,
+          deliverable: { title: 'UX Wireframe Notes', md: `# UX Wireframe Notes\n\n- Core screens\n- Navigation\n- Accessibility notes` }
+        }
+      };
+      proj.team.forEach(pid => {
+        const s = steps[pid]; if (!s) return;
+        addMessage(personas[pid].name, s.md, 'ai');
+        const d = { id: pid + '-' + Math.random().toString(36).slice(2, 7), title: s.deliverable.title, md: s.deliverable.md, ts: Date.now() };
+        proj.deliverables[pid].push(d);
+        proj.progress[pid] = Math.min(100, (proj.progress[pid]||0) + 20);
+      });
+      renderDashboardCards();
+      renderChatDeliverables();
+      // Also update persona views if open
+      (getCurrentProject().team || []).forEach(pid => { renderPersonaDeliverables(pid); renderPersonaChat(pid); });
+    }
+
+    // Wiring
+    document.addEventListener('DOMContentLoaded', () => {
+      // Sidebar
+      renderSidebar();
+
+      // Top nav
+      document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => showView(i.dataset.view)));
+
+      // Header actions
+      byId('project-select').addEventListener('change', (e) => { currentProjectId = e.target.value; renderProjectSelector(); });
+      byId('btn-new-project').addEventListener('click', () => openProjectModal(false));
+      byId('btn-edit-project').addEventListener('click', () => openProjectModal(true));
+
+      // Overview actions
+      byId('btn-create-project').addEventListener('click', () => openProjectModal(false));
+
+      // Chat actions
+      byId('btn-send').addEventListener('click', submitExecutiveIdea);
+
+      // Project modal controls
+      byId('project-modal-close').addEventListener('click', () => showProjectModal(false));
+      byId('project-modal-save').addEventListener('click', () => {
+        const name = byId('project-name').value.trim();
+        const team = getSelectedTeamFromModal();
+        if (!name || team.length === 0) { alert('Please enter a project name and select at least one persona.'); return; }
+        const isEdit = byId('project-modal-title').textContent.startsWith('Update');
+        if (isEdit) {
+          editProjectTeam(team);
+        } else {
+          createProject(name, team);
+        }
+        showProjectModal(false); showView('chat');
+      });
+
+      // Deliverable modal controls
+      byId('deliverable-modal-close').addEventListener('click', () => showDeliverableModal(false));
+
+      // Initial render
+      renderProjectSelector();
+    });
+  </script>
+</body>
+</html>
