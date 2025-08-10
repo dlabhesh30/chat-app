@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StartupSuite – Executive Orchestration</title>
+  <title>StartupSuite – AI Team Platform</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; overflow-x: hidden; }
@@ -117,11 +117,16 @@
     .deliverable-item:hover { border-color: #8b5cf6; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1); }
     .deliverable-item h5 { color: #374151; font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
     .deliverable-item p { color: #6b7280; font-size: 0.9rem; line-height: 1.5; }
+    
+    /* Deliverable Modal */
     .deliverable-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 1000; }
     .deliverable-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 12px; padding: 30px; max-width: 800px; max-height: 80vh; overflow-y: auto; }
     .deliverable-content h3 { color: #1f2937; margin-bottom: 15px; }
-    .deliverable-content .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280; }
-    .deliverable-content .close-btn:hover { color: #374151; }
+    .deliverable-content h4 { color: #374151; margin: 20px 0 10px 0; }
+    .deliverable-content ul { margin-left: 20px; margin-bottom: 15px; }
+    .deliverable-content li { margin-bottom: 5px; }
+    .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280; }
+    .close-btn:hover { color: #374151; }
 
     @media (max-width: 768px) {
       .personas-grid { grid-template-columns: 1fr; }
@@ -137,7 +142,7 @@
     <div class="sidebar">
       <div class="sidebar-header">
         <h2>StartupSuite</h2>
-        <p style="color: #6b7280; font-size: 0.8rem;">Personas</p>
+        <p style="color: #6b7280; font-size: 0.8rem;">AI Team Platform</p>
       </div>
       <div class="sidebar-nav">
         <div class="nav-item active" data-view="overview">📊 Dashboard</div>
@@ -149,7 +154,7 @@
     <!-- Main Content -->
     <div class="main-content">
       <div class="top-header">
-        <h1 id="view-title">Team Overview</h1>
+        <h1 id="view-title">Dashboard</h1>
         <div class="header-toolbar">
           <div class="toolbar-group">
             <span class="toolbar-label">Project</span>
@@ -168,7 +173,7 @@
           </div>
           <div style="flex:1 1 auto"></div>
           <button class="header-btn" id="btn-new">New Project</button>
-          <button class="header-btn" id="btn-setup">Settings</button>
+          <button class="header-btn" id="btn-settings">Settings</button>
         </div>
       </div>
 
@@ -177,8 +182,8 @@
           <!-- Overview -->
           <div class="view active" id="overview-view">
             <div class="welcome-section" id="welcome-section">
-              <h2>Welcome to Your AI Team!</h2>
-              <p>Get started by creating a new project and assembling your team.</p>
+              <h2>Welcome to StartupSuite!</h2>
+              <p>Get started by creating a new project and assembling your AI team.</p>
               <div style="text-align:center; margin-top: 20px;">
                 <button class="btn" id="btn-start-project">Assemble Your Team</button>
               </div>
@@ -322,8 +327,8 @@
       setTimeout(() => {
         const responses = {
           'product-manager': `Thank you for your question! As your **Product Manager**, I'm analyzing this from a market perspective.\n\nHere's my initial assessment:\n- Market opportunity analysis\n- User persona definition\n- Competitive landscape review\n\nI'll create a comprehensive *Product Requirements Document* based on this input.`,
-          'solution-architect': `Great question! From a **technical architecture** standpoint, I need to consider:\n\n\`\`\`\n- System scalability requirements\n- Technology stack selection\n- Integration patterns\n\`\`\`\n\nLet me design the optimal solution architecture for this requirement.`,
-          'program-manager': `Excellent! As your **Program Manager**, I'll break this down into actionable tasks:\n\n1. **Phase 1**: Requirements gathering\n2. **Phase 2**: Design and architecture\n3. **Phase 3**: Implementation planning\n\nI'll create a detailed project timeline with milestones.`,
+          'solution-architect': `Great question! From a **technical architecture** standpoint, I need to consider:\n\n\`System scalability requirements\`\n\`Technology stack selection\`\n\`Integration patterns\`\n\nLet me design the optimal solution architecture for this requirement.`,
+          'program-manager': `Excellent! As your **Program Manager**, I'll break this down into actionable tasks:\n\n**Phase 1**: Requirements gathering\n**Phase 2**: Design and architecture\n**Phase 3**: Implementation planning\n\nI'll create a detailed project timeline with milestones.`,
           'design-buddy': `Love this direction! From a **UX/UI perspective**, I'm thinking about:\n\n- User journey mapping\n- Interface wireframes\n- Design system components\n\nI'll create mockups that prioritize *user experience* and visual consistency.`,
           'executive': `Excellent strategic thinking! As your **Executive**, I see the bigger picture:\n\n**Key Strategic Objectives:**\n- Market positioning\n- Resource allocation\n- Risk assessment\n\nThis aligns well with our overall business goals and competitive strategy.`
         };
@@ -345,6 +350,20 @@
       if (view === 'setup') { byId('setup-view').classList.add('active'); byId('view-title').textContent = 'Team Setup'; renderSetupGrid(); }
       if (view === 'chat') { byId('chat-view').classList.add('active'); byId('view-title').textContent = 'Executive Chat'; renderSelectedTeam(); }
       currentView = view;
+    }
+
+    function updateDashboardView() {
+      const welcomeSection = byId('welcome-section');
+      const projectSection = byId('project-section');
+      
+      if (currentProject) {
+        welcomeSection.style.display = 'none';
+        projectSection.style.display = 'block';
+      } else {
+        welcomeSection.style.display = 'block';
+        projectSection.style.display = 'none';
+      }
+      updateProgressOverview();
     }
 
     function renderSidebar() {
@@ -372,8 +391,9 @@
       const grid = byId('setup-personas-grid');
       grid.innerHTML = Object.keys(personas).map(pid => {
         const p = personas[pid];
+        const isSelected = selectedPersonas.includes(pid);
         return `
-          <div class="persona-card" data-persona="${pid}">
+          <div class="persona-card ${isSelected ? 'selected' : ''}" data-persona="${pid}">
             <div class="persona-avatar" style="background:${p.color}; width:48px; height:48px; margin:0 auto 10px; font-size:1.1rem;">${p.shortName}</div>
             <h4>${p.name}</h4>
             <p>${p.description}</p>
@@ -563,6 +583,35 @@
           
           <h4>Scalability Considerations</h4>
           <p>Horizontal scaling capabilities, load balancing, and automated failover mechanisms.</p>
+        `,
+        'project-timeline': `
+          <h4>Project Timeline</h4>
+          <p><strong>Duration:</strong> 6 months with 3 major phases</p>
+          
+          <h4>Phase Breakdown</h4>
+          <ul>
+            <li><strong>Phase 1 (Months 1-2):</strong> Requirements and Design</li>
+            <li><strong>Phase 2 (Months 3-4):</strong> Core Development</li>
+            <li><strong>Phase 3 (Months 5-6):</strong> Testing and Launch</li>
+          </ul>
+          
+          <h4>Key Milestones</h4>
+          <p>MVP completion, beta testing, and production deployment milestones with clear success criteria.</p>
+        `,
+        'user-journey': `
+          <h4>User Journey Analysis</h4>
+          <p><strong>Primary User Flow:</strong> Discovery → Evaluation → Onboarding → Active Use</p>
+          
+          <h4>Key Touchpoints</h4>
+          <ul>
+            <li><strong>Landing Page:</strong> Clear value proposition</li>
+            <li><strong>Sign-up Flow:</strong> Streamlined registration</li>
+            <li><strong>First Use:</strong> Guided onboarding experience</li>
+            <li><strong>Daily Use:</strong> Efficient workflow patterns</li>
+          </ul>
+          
+          <h4>Pain Points & Solutions</h4>
+          <p>Identified friction points in current solutions and proposed UX improvements.</p>
         `
       };
       
@@ -580,20 +629,6 @@
       const st = byId(`${personaId}-status`); if (st) st.textContent = thinking.substring(0, 40) + '...';
       const ind = byId(`${personaId}-indicator`); if (ind) ind.className = `status-indicator status-${status}`;
       if (currentView === `${personaId}-persona`) updatePersonaView(personaId);
-      updateProgressOverview();
-    }
-
-    function updateDashboardView() {
-      const welcomeSection = byId('welcome-section');
-      const projectSection = byId('project-section');
-      
-      if (currentProject) {
-        welcomeSection.style.display = 'none';
-        projectSection.style.display = 'block';
-      } else {
-        welcomeSection.style.display = 'block';
-        projectSection.style.display = 'none';
-      }
       updateProgressOverview();
     }
 
@@ -663,6 +698,7 @@
         updateDashboardView();
         renderSelectedTeam();
         updateProgressOverview();
+        renderSidebar();
       } else {
         currentProject = null;
         selectedPersonas = [];
@@ -770,19 +806,24 @@
     }
 
     function resetWorkflow() {
-      selectedPersonas = []; Object.keys(personas).forEach(id => { personaStates[id] = { status: 'idle', thinking: 'Ready to contribute to the project...', progress: 0, dependencies: [], deliverables: [] }; const st = byId(`${id}-status`); if (st) st.textContent = 'Ready to work'; const ind = byId(`${id}-indicator`); if (ind) ind.className = 'status-indicator status-idle'; });
+      selectedPersonas = []; 
+      currentProject = null;
+      Object.keys(personas).forEach(id => { 
+        personaStates[id] = { status: 'idle', thinking: 'Ready to contribute to the project...', progress: 0, dependencies: [], deliverables: [] }; 
+        const st = byId(`${id}-status`); if (st) st.textContent = 'Ready to work'; 
+        const ind = byId(`${id}-indicator`); if (ind) ind.className = 'status-indicator status-idle'; 
+      });
       byId('chat-messages').innerHTML = '<div class="message system"><div class="message-header">System</div>Team initialized. Ready to receive your executive idea.</div>';
       byId('action-plan-section').style.display = 'none'; byId('progress-overview-section').style.display = 'none';
       byId('executive-input').placeholder = 'Describe your idea or project...'; byId('executive-input').value = '';
       byId('proceed-to-chat').disabled = true; instances.length = 0; tasks.length = 0; renderToolbar(); renderLinkedChips();
-      renderSetupGrid(); showView('overview');
+      updateProjectSelector(); updateDashboardView(); renderSetupGrid(); showView('overview');
     }
 
     // Event wiring
     document.addEventListener('DOMContentLoaded', () => {
       // Top nav
       document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => showView(i.dataset.view)));
-      byId('btn-setup').addEventListener('click', () => showView('setup'));
       byId('btn-new').addEventListener('click', createNewProject);
       byId('btn-start-project').addEventListener('click', () => showView('setup'));
       byId('btn-update-team').addEventListener('click', () => showView('setup'));
@@ -799,6 +840,11 @@
       byId('btn-send').addEventListener('click', submitExecutiveIdea);
       byId('btn-refine').addEventListener('click', refineActionPlan);
       byId('btn-approve').addEventListener('click', approveActionPlan);
+
+      // Modal close on background click
+      byId('deliverable-modal').addEventListener('click', (e) => {
+        if (e.target === byId('deliverable-modal')) closeDeliverableModal();
+      });
 
       updateProjectSelector();
       updateDashboardView();
