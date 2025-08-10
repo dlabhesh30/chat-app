@@ -110,62 +110,59 @@
       background: rgba(255, 255, 255, 0.8); 
       backdrop-filter: blur(20px);
       color: #1d1d1f; 
-      padding: 20px 32px; 
+      padding: 16px 32px; 
       display: flex; 
       align-items: center; 
       justify-content: space-between; 
       border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
     .top-header h1 { 
-      font-size: 1.375rem; 
+      font-size: 1.25rem; 
       font-weight: 600; 
       letter-spacing: -0.02em;
+      margin: 0;
     }
-    .header-toolbar { display: flex; align-items: center; gap: 16px; }
-    .toolbar-group { 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-      background: rgba(0, 0, 0, 0.04); 
-      border: 1px solid rgba(0, 0, 0, 0.06); 
-      padding: 8px 12px; 
-      border-radius: 8px; 
+    
+    .project-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .toolbar-label { 
-      font-size: 0.75rem; 
-      color: #86868b; 
-      font-weight: 500;
-    }
-    .toolbar-chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .toolbar-chip { 
-      background: #f5f5f7; 
-      color: #1d1d1f; 
-      border: 1px solid rgba(0, 0, 0, 0.06); 
-      padding: 4px 10px; 
-      border-radius: 6px; 
-      font-size: 0.75rem; 
-      cursor: pointer; 
-      font-weight: 500;
-      transition: all 0.15s ease;
-    }
-    .toolbar-chip:hover { background: #e5e5e7; }
+    
     .project-selector { 
-      background: #f5f5f7; 
-      border: 1px solid rgba(0, 0, 0, 0.06); 
+      background: transparent; 
+      border: 1px solid rgba(0, 0, 0, 0.1); 
       color: #1d1d1f; 
-      padding: 8px 12px; 
+      padding: 6px 12px; 
       border-radius: 6px; 
       font-size: 0.875rem; 
       cursor: pointer; 
-      min-width: 150px;
-      font-weight: 500;
+      min-width: 180px;
+      font-weight: 400;
+    }
+    .project-selector:hover {
+      background: rgba(0, 0, 0, 0.02);
     }
     .project-selector option { background: white; color: #1d1d1f; }
+    
     .header-btn { 
       background: #007aff; 
       border: none; 
       color: white; 
-      padding: 8px 16px; 
+      padding: 6px 16px; 
       border-radius: 6px; 
       font-size: 0.875rem; 
       cursor: pointer; 
@@ -173,6 +170,15 @@
       font-weight: 500;
     }
     .header-btn:hover { background: #0056cc; }
+    .header-btn.secondary {
+      background: transparent;
+      color: #86868b;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .header-btn.secondary:hover {
+      background: rgba(0, 0, 0, 0.04);
+      color: #1d1d1f;
+    }
 
     .content-area { 
       flex: 1; 
@@ -574,45 +580,95 @@
       text-align: center;
     }
     
-    /* Interrupt Controls */
-    .interrupt-controls {
+    /* New Project Modal */
+    .new-project-modal {
       display: none;
-      background: rgba(255, 59, 48, 0.1);
-      border: 1px solid rgba(255, 59, 48, 0.3);
-      border-radius: 12px;
-      padding: 16px;
-      margin: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
     }
     
-    .interrupt-controls h4 {
-      color: #d70015;
+    .new-project-content {
+      background: white;
+      border-radius: 16px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+    }
+    
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 32px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    
+    .modal-header h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    
+    .modal-body {
+      padding: 24px 32px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
       font-size: 0.875rem;
       font-weight: 600;
-      margin-bottom: 12px;
+      color: #1d1d1f;
+      margin-bottom: 8px;
     }
     
-    .interrupt-actions {
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: all 0.15s ease;
+      background: rgba(255, 255, 255, 0.8);
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #007aff;
+      background: white;
+    }
+    
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    
+    .modal-footer {
       display: flex;
       gap: 12px;
-      flex-wrap: wrap;
+      justify-content: flex-end;
+      padding: 20px 32px;
+      background: rgba(0, 0, 0, 0.02);
     }
     
-    .interrupt-btn {
-      background: transparent;
-      border: 1px solid rgba(255, 59, 48, 0.3);
-      color: #d70015;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      font-weight: 500;
-    }
-    
-    .interrupt-btn:hover {
-      background: #ff3b30;
-      color: white;
-    }
+
 
     /* Persona individual */
     .persona-view { padding: 0; }
@@ -810,25 +866,17 @@
     <!-- Main Content -->
     <div class="main-content">
       <div class="top-header">
-        <h1 id="view-title">Dashboard</h1>
-        <div class="header-toolbar">
-          <div class="toolbar-group">
-            <span class="toolbar-label">Project</span>
+        <div class="header-left">
+          <h1 id="view-title">Dashboard</h1>
+          <div class="project-info" id="project-info">
             <select id="project-selector" class="project-selector">
               <option value="">Select Project...</option>
               <option value="new">+ New Project</option>
             </select>
           </div>
-          <div class="toolbar-group">
-            <span class="toolbar-label">Instances</span>
-            <div class="toolbar-chips" id="toolbar-instances"></div>
-          </div>
-          <div class="toolbar-group">
-            <span class="toolbar-label">Tasks</span>
-            <div class="toolbar-chips" id="toolbar-tasks"></div>
-          </div>
-          <div style="flex:1 1 auto"></div>
-          <button class="header-btn" id="btn-settings">Settings</button>
+        </div>
+        <div class="header-right">
+          <button class="header-btn secondary" id="btn-settings">Settings</button>
         </div>
       </div>
 
@@ -886,8 +934,8 @@
                     <button class="action-btn" id="btn-broadcast-mode" title="Toggle broadcast mode">
                       <span>📢</span> <span id="broadcast-mode-text">Broadcast</span>
                     </button>
-                    <button class="action-btn danger" id="btn-interrupt" title="Interrupt current work">
-                      <span>⏸️</span> Interrupt
+                    <button class="action-btn" id="btn-interrupt" title="Interrupt current work">
+                      <span id="interrupt-icon">⏸️</span> <span id="interrupt-text">Interrupt</span>
                     </button>
                     <button class="action-btn" id="btn-reset-chat" title="Reset conversation">
                       <span>🔄</span> Reset
@@ -922,18 +970,7 @@
                 </div>
               </div>
               
-              <!-- Interrupt Controls -->
-              <div class="interrupt-controls" id="interrupt-controls">
-                <h4>⏸️ Work Interrupted</h4>
-                <p style="font-size: 0.875rem; color: #86868b; margin-bottom: 12px;">
-                  Choose how to proceed with the current workflow:
-                </p>
-                <div class="interrupt-actions">
-                  <button class="interrupt-btn" onclick="resumeWork()">Resume Work</button>
-                  <button class="interrupt-btn" onclick="modifyAndResend()">Modify & Resend</button>
-                  <button class="interrupt-btn" onclick="resetWorkflow()">Reset Workflow</button>
-                </div>
-              </div>
+
             </div>
           </div>
 
@@ -945,6 +982,30 @@
   </div>
 
 
+
+  <!-- New Project Modal -->
+  <div class="new-project-modal" id="new-project-modal">
+    <div class="new-project-content">
+      <div class="modal-header">
+        <h3>Create New Project</h3>
+        <button class="close-btn" onclick="closeNewProjectModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="project-name-input">Project Name</label>
+          <input type="text" id="project-name-input" placeholder="Enter your project name..." />
+        </div>
+        <div class="form-group">
+          <label for="project-description-input">Description (optional)</label>
+          <textarea id="project-description-input" placeholder="Brief description of your project..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeNewProjectModal()">Cancel</button>
+        <button class="btn" onclick="createProjectFromModal()">Create Project</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Deliverable Modal -->
   <div class="deliverable-modal" id="deliverable-modal">
@@ -1229,8 +1290,23 @@
     
 
     
+    function toggleWorkflowInterrupt() {
+      if (workflowInterrupted) {
+        // Resume work
+        resumeWork();
+      } else {
+        // Interrupt work
+        interruptWorkflow();
+      }
+    }
+    
     function interruptWorkflow() {
       workflowInterrupted = true;
+      
+      // Update button to show play
+      byId('interrupt-icon').textContent = '▶️';
+      byId('interrupt-text').textContent = 'Resume';
+      byId('btn-interrupt').title = 'Resume current work';
       
       // Stop all active timers
       Object.keys(workflowTimers).forEach(timerId => {
@@ -1241,19 +1317,20 @@
       // Update all working personas to interrupted state
       selectedPersonas.forEach(pid => {
         if (personaStates[pid].status === 'working') {
-          updatePersonaStatus(pid, 'waiting', 'Work interrupted - awaiting new instructions...');
+          updatePersonaStatus(pid, 'waiting', 'Work paused - click Resume to continue...');
         }
       });
       
-      // Show interrupt controls
-      byId('interrupt-controls').style.display = 'block';
-      
-      addMessage('System', '⏸️ Workflow interrupted. All personas have paused their current work.', 'system');
+      addMessage('System', '⏸️ Workflow paused. Click Resume to continue or Reset to start over.', 'system');
     }
     
     function resumeWork() {
       workflowInterrupted = false;
-      byId('interrupt-controls').style.display = 'none';
+      
+      // Update button back to pause
+      byId('interrupt-icon').textContent = '⏸️';
+      byId('interrupt-text').textContent = 'Interrupt';
+      byId('btn-interrupt').title = 'Interrupt current work';
       
       // Resume workflow from current state
       addMessage('System', '▶️ Workflow resumed. Personas will continue their work.', 'system');
@@ -1373,19 +1450,11 @@
     }
 
     function renderToolbar() {
-      const instC = byId('toolbar-instances');
-      const taskC = byId('toolbar-tasks');
-      instC.innerHTML = instances.map(inst => `<span class="toolbar-chip" data-inst="${inst.id}">${inst.name}</span>`).join('');
-      taskC.innerHTML = tasks.map(t => `<span class="toolbar-chip" data-task="${t.id}">${t.title}</span>`).join('');
-      instC.querySelectorAll('[data-inst]').forEach(chip => chip.addEventListener('click', () => {
-        const inst = instances.find(i => i.id === chip.dataset.inst); if (inst) showPersonaView(inst.personaId);
-      }));
-      taskC.querySelectorAll('[data-task]').forEach(chip => chip.addEventListener('click', () => { showView('chat'); }));
+      // Simplified - no longer showing instances and tasks in header
     }
 
     function renderLinkedChips() {
-      byId('linked-instances').innerHTML = instances.map(i => `<span class="chip">${i.name}</span>`).join('');
-      byId('linked-tasks').innerHTML = tasks.map(t => `<span class="chip secondary">${t.title}</span>`).join('');
+      // Simplified - no longer showing linked chips
     }
 
     function showPersonaView(personaId) {
@@ -1643,12 +1712,30 @@
     }
 
     function createNewProject() {
-      const projectName = prompt('Enter project name:');
-      if (!projectName) return;
+      // Show the styled modal instead of prompt
+      byId('new-project-modal').style.display = 'flex';
+      byId('project-name-input').focus();
+    }
+    
+    function closeNewProjectModal() {
+      byId('new-project-modal').style.display = 'none';
+      byId('project-name-input').value = '';
+      byId('project-description-input').value = '';
+    }
+    
+    function createProjectFromModal() {
+      const projectName = byId('project-name-input').value.trim();
+      const projectDescription = byId('project-description-input').value.trim();
+      
+      if (!projectName) {
+        byId('project-name-input').focus();
+        return;
+      }
       
       const project = {
         id: 'proj_' + Date.now(),
         name: projectName,
+        description: projectDescription,
         personas: [],
         created: new Date().toISOString()
       };
@@ -1657,6 +1744,7 @@
       currentProject = project;
       selectedPersonas = [];
       updateProjectSelector();
+      closeNewProjectModal();
       showView('setup');
     }
 
@@ -1695,13 +1783,13 @@
         return;
       }
       
-      // If we have an active persona (after workflow started), send to that persona
-      if (currentActivePersona && currentView === 'overview') {
+      // If we have an active persona, send to that persona
+      if (currentActivePersona) {
         sendPersonaMessage(currentActivePersona);
         return;
       }
       
-      // Otherwise, handle as executive idea (initial submission in chat view)
+      // Otherwise, handle as executive idea (initial submission)
       addMessage('You', idea, 'user'); 
       input.value = '';
       setTimeout(() => generateActionPlan(idea), 800);
@@ -1878,10 +1966,14 @@
       byId('chat-messages').innerHTML = '<div class="message system"><div class="message-header">System</div>Team initialized. Ready to receive your executive idea.</div>';
       byId('action-plan-section').style.display = 'none'; 
       byId('progress-overview-section').style.display = 'none';
-      byId('interrupt-controls').style.display = 'none';
       byId('executive-input').placeholder = 'Describe your idea or project...'; 
       byId('executive-input').value = '';
-      byId('proceed-to-chat').disabled = true; 
+      byId('proceed-to-chat').disabled = true;
+      
+      // Reset interrupt button
+      byId('interrupt-icon').textContent = '⏸️';
+      byId('interrupt-text').textContent = 'Interrupt';
+      byId('btn-interrupt').title = 'Interrupt current work'; 
       instances.length = 0; tasks.length = 0; 
       renderToolbar(); renderLinkedChips();
       updateProjectSelector(); updateDashboardView(); renderSetupGrid(); showView('overview');
@@ -1909,7 +2001,7 @@
       
       // New chat controls
       byId('btn-broadcast-mode').addEventListener('click', toggleBroadcastMode);
-      byId('btn-interrupt').addEventListener('click', interruptWorkflow);
+      byId('btn-interrupt').addEventListener('click', toggleWorkflowInterrupt);
       byId('btn-reset-chat').addEventListener('click', () => {
         if (confirm('Are you sure you want to reset the chat? This will clear all messages.')) {
           resetChatMessages();
@@ -1919,6 +2011,15 @@
       // Modal close on background click
       byId('deliverable-modal').addEventListener('click', (e) => {
         if (e.target === byId('deliverable-modal')) closeDeliverableModal();
+      });
+      
+      byId('new-project-modal').addEventListener('click', (e) => {
+        if (e.target === byId('new-project-modal')) closeNewProjectModal();
+      });
+      
+      // Enter key support for new project modal
+      byId('project-name-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') createProjectFromModal();
       });
 
       updateProjectSelector();
