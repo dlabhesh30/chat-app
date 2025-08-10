@@ -374,26 +374,85 @@
       margin-bottom: 16px;
     }
     
-    .active-personas {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+    .persona-selector {
+      position: relative;
     }
     
-    .persona-chip {
+    .current-persona {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       background: #f5f5f7;
-      color: #1d1d1f;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 500;
       border: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 8px 12px;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.15s ease;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #1d1d1f;
+      min-width: 160px;
     }
     
-    .persona-chip:hover { background: #e5e5e7; }
-    .persona-chip.active { background: #007aff; color: white; }
+    .current-persona:hover {
+      background: #e5e5e7;
+    }
+    
+    .dropdown-arrow {
+      margin-left: auto;
+      font-size: 0.75rem;
+      color: #86868b;
+      transition: transform 0.15s ease;
+    }
+    
+    .current-persona.open .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+    
+    .persona-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+    
+    .persona-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.875rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    }
+    
+    .persona-option:last-child {
+      border-bottom: none;
+    }
+    
+    .persona-option:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    
+    .persona-option.active {
+      background: #007aff;
+      color: white;
+    }
+    
+    .persona-option .persona-avatar {
+      width: 20px;
+      height: 20px;
+      font-size: 0.65rem;
+      margin-right: 0;
+    }
     
     .chat-actions {
       display: flex;
@@ -505,105 +564,14 @@
       background: white;
     }
     
-    /* Broadcast Modal */
-    .broadcast-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(10px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .broadcast-content {
-      background: white;
-      border-radius: 16px;
-      padding: 32px;
-      max-width: 500px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    }
-    
-    .broadcast-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
-    
-    .broadcast-header h3 {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #1d1d1f;
-      margin: 0;
-    }
-    
-    .close-btn {
-      background: transparent;
-      border: none;
-      font-size: 1.5rem;
-      color: #86868b;
-      cursor: pointer;
-      padding: 0;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      transition: all 0.15s ease;
-    }
-    
-    .close-btn:hover {
-      background: rgba(0, 0, 0, 0.04);
-      color: #1d1d1f;
-    }
-    
-    .persona-selection {
-      margin-bottom: 20px;
-    }
-    
-    .persona-selection h4 {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #1d1d1f;
-      margin-bottom: 12px;
-    }
-    
-    .persona-checkboxes {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 12px;
-    }
-    
-    .persona-checkbox {
-      display: flex;
-      align-items: center;
-      padding: 12px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
+    /* Broadcast Mode */
+    .broadcast-indicator {
+      background: rgba(255, 149, 0, 0.1);
+      border: 1px solid rgba(255, 149, 0, 0.3);
       border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    
-    .persona-checkbox:hover {
-      background: rgba(0, 0, 0, 0.02);
-    }
-    
-    .persona-checkbox.selected {
-      background: rgba(0, 122, 255, 0.1);
-      border-color: #007aff;
-    }
-    
-    .persona-checkbox input {
-      margin-right: 8px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      text-align: center;
     }
     
     /* Interrupt Controls */
@@ -860,7 +828,6 @@
             <div class="toolbar-chips" id="toolbar-tasks"></div>
           </div>
           <div style="flex:1 1 auto"></div>
-          <button class="header-btn" id="btn-new">New Project</button>
           <button class="header-btn" id="btn-settings">Settings</button>
         </div>
       </div>
@@ -906,12 +873,18 @@
             <div class="chat-interface">
               <div class="chat-header">
                 <div class="chat-controls">
-                  <div class="active-personas" id="active-personas">
-                    <!-- Persona chips will be rendered here -->
+                  <div class="persona-selector">
+                    <div class="current-persona" id="current-persona-display" onclick="togglePersonaDropdown()">
+                      <span id="current-persona-name">Executive Chat</span>
+                      <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="persona-dropdown" id="persona-dropdown" style="display: none;">
+                      <!-- Persona options will be rendered here -->
+                    </div>
                   </div>
                   <div class="chat-actions">
-                    <button class="action-btn" id="btn-broadcast" title="Send update to all linked personas">
-                      <span>📢</span> Broadcast
+                    <button class="action-btn" id="btn-broadcast-mode" title="Toggle broadcast mode">
+                      <span>📢</span> <span id="broadcast-mode-text">Broadcast</span>
                     </button>
                     <button class="action-btn danger" id="btn-interrupt" title="Interrupt current work">
                       <span>⏸️</span> Interrupt
@@ -920,14 +893,6 @@
                       <span>🔄</span> Reset
                     </button>
                   </div>
-                </div>
-                
-                <div class="team-info" id="team-info" style="display: none;">
-                  <h4>Selected Team</h4>
-                  <div class="chip-row" id="selected-team-chips"></div>
-                  <div style="height:8px"></div>
-                  <div class="chip-row" id="linked-instances"></div>
-                  <div class="chip-row" id="linked-tasks" style="margin-top:6px"></div>
                 </div>
               </div>
               
@@ -939,6 +904,9 @@
               </div>
               
               <div class="input-section">
+                <div class="broadcast-indicator" id="broadcast-indicator" style="display: none;">
+                  <span style="font-size: 0.75rem; color: #ff9500; font-weight: 500;">📢 Broadcast Mode - Message will be sent to all selected personas</span>
+                </div>
                 <textarea id="executive-input" placeholder="Describe your idea or project..."></textarea>
                 <button class="btn" id="btn-send">Send</button>
               </div>
@@ -976,32 +944,7 @@
     </div>
   </div>
 
-  <!-- Broadcast Modal -->
-  <div class="broadcast-modal" id="broadcast-modal">
-    <div class="broadcast-content">
-      <div class="broadcast-header">
-        <h3>Broadcast Update</h3>
-        <button class="close-btn" onclick="closeBroadcastModal()">&times;</button>
-      </div>
-      
-      <div class="persona-selection">
-        <h4>Select personas to notify:</h4>
-        <div class="persona-checkboxes" id="broadcast-personas">
-          <!-- Checkboxes will be populated here -->
-        </div>
-      </div>
-      
-      <div style="margin-bottom: 20px;">
-        <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #1d1d1f; margin-bottom: 8px;">Message:</label>
-        <textarea id="broadcast-message" placeholder="Enter the update you want to share..." style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 8px; font-family: inherit; font-size: 0.875rem; resize: vertical;"></textarea>
-      </div>
-      
-      <div style="display: flex; gap: 12px; justify-content: flex-end;">
-        <button class="btn btn-secondary" onclick="closeBroadcastModal()">Cancel</button>
-        <button class="btn" onclick="sendBroadcast()">Send Update</button>
-      </div>
-    </div>
-  </div>
+
 
   <!-- Deliverable Modal -->
   <div class="deliverable-modal" id="deliverable-modal">
@@ -1035,6 +978,7 @@
     let currentActivePersona = null; // Currently selected persona for chat
     let workflowInterrupted = false;
     let workflowTimers = {}; // Store active timers for interruption
+    let broadcastMode = false; // Whether we're in broadcast mode
 
     Object.keys(personas).forEach(id => {
       personaStates[id] = { status: 'idle', thinking: 'Ready to contribute to the project...', progress: 0, dependencies: [], deliverables: [] };
@@ -1177,119 +1121,113 @@
     }
 
     function renderSelectedTeam() {
-      // Render active personas in chat header
-      const activePersonasContainer = byId('active-personas');
-      if (activePersonasContainer) {
-        activePersonasContainer.innerHTML = selectedPersonas.map(pid => 
-          `<span class="persona-chip ${currentActivePersona === pid ? 'active' : ''}" 
-                 data-persona="${pid}" onclick="switchToPersona('${pid}')">${personas[pid].name}</span>`
-        ).join('');
+      // Update current persona display
+      const currentPersonaDisplay = byId('current-persona-name');
+      if (currentPersonaDisplay) {
+        if (currentActivePersona) {
+          currentPersonaDisplay.textContent = personas[currentActivePersona].name;
+        } else {
+          currentPersonaDisplay.textContent = 'Executive Chat';
+        }
       }
       
-      // Legacy team chips (hidden by default)
-      const teamChips = byId('selected-team-chips');
-      if (teamChips) {
-        teamChips.innerHTML = selectedPersonas.map(pid => `<span class="chip">${personas[pid].name}</span>`).join('');
+      // Render persona dropdown options
+      const dropdown = byId('persona-dropdown');
+      if (dropdown) {
+        const options = [
+          { id: null, name: 'Executive Chat', description: 'Initial project discussion' },
+          ...selectedPersonas.map(pid => ({
+            id: pid,
+            name: personas[pid].name,
+            description: personas[pid].description
+          }))
+        ];
+        
+        dropdown.innerHTML = options.map(option => `
+          <div class="persona-option ${currentActivePersona === option.id ? 'active' : ''}" 
+               onclick="switchToPersona('${option.id}')">
+            ${option.id ? `<div class="persona-avatar" style="background:${personas[option.id].color};">${personas[option.id].shortName}</div>` : '<span style="width: 20px; text-align: center;">💼</span>'}
+            <div>
+              <div style="font-weight: 500;">${option.name}</div>
+            </div>
+          </div>
+        `).join('');
       }
       
       renderToolbar();
       renderLinkedChips();
     }
     
+    function togglePersonaDropdown() {
+      const dropdown = byId('persona-dropdown');
+      const display = byId('current-persona-display');
+      const isOpen = dropdown.style.display === 'block';
+      
+      dropdown.style.display = isOpen ? 'none' : 'block';
+      display.classList.toggle('open', !isOpen);
+      
+      // Close dropdown when clicking outside
+      if (!isOpen) {
+        setTimeout(() => {
+          document.addEventListener('click', closeDropdownOnOutsideClick, { once: true });
+        }, 0);
+      }
+    }
+    
+    function closeDropdownOnOutsideClick(event) {
+      const dropdown = byId('persona-dropdown');
+      const display = byId('current-persona-display');
+      
+      if (!dropdown.contains(event.target) && !display.contains(event.target)) {
+        dropdown.style.display = 'none';
+        display.classList.remove('open');
+      }
+    }
+    
     function switchToPersona(personaId) {
-      currentActivePersona = personaId;
+      currentActivePersona = personaId === 'null' ? null : personaId;
+      
+      // Close dropdown
+      byId('persona-dropdown').style.display = 'none';
+      byId('current-persona-display').classList.remove('open');
+      
       renderSelectedTeam();
       
       // Update chat messages to show this persona's conversation
       const chatMessages = byId('chat-messages');
-      const personaChatMessages = byId(`${personaId}-chat-messages`);
       
-      if (personaChatMessages) {
-        chatMessages.innerHTML = personaChatMessages.innerHTML;
+      if (currentActivePersona) {
+        const personaChatMessages = byId(`${currentActivePersona}-chat-messages`);
+        
+        if (personaChatMessages) {
+          chatMessages.innerHTML = personaChatMessages.innerHTML;
+        } else {
+          chatMessages.innerHTML = `
+            <div class="message system">
+              <div class="message-header">System</div>
+              Now chatting with ${personas[currentActivePersona].name}. Ask follow-up questions or provide additional guidance.
+            </div>
+          `;
+        }
+        
+        // Update input placeholder
+        const input = byId('executive-input');
+        input.placeholder = `Ask ${personas[currentActivePersona].name} a follow-up question...`;
       } else {
+        // Back to executive chat
         chatMessages.innerHTML = `
           <div class="message system">
             <div class="message-header">System</div>
-            Now chatting with ${personas[personaId].name}. Ask follow-up questions or provide additional guidance.
+            Team initialized. Ready to receive your executive idea.
           </div>
         `;
-      }
-      
-      // Update input placeholder
-      const input = byId('executive-input');
-      input.placeholder = `Ask ${personas[personaId].name} a follow-up question...`;
-    }
-    
-    function openBroadcastModal() {
-      const modal = byId('broadcast-modal');
-      const personasContainer = byId('broadcast-personas');
-      
-      // Populate persona checkboxes
-      personasContainer.innerHTML = selectedPersonas.map(pid => `
-        <div class="persona-checkbox" onclick="togglePersonaSelection('${pid}')">
-          <input type="checkbox" id="broadcast-${pid}" />
-          <label for="broadcast-${pid}" style="cursor: pointer; font-size: 0.875rem; color: #1d1d1f;">
-            ${personas[pid].name}
-          </label>
-        </div>
-      `).join('');
-      
-      modal.style.display = 'flex';
-    }
-    
-    function closeBroadcastModal() {
-      byId('broadcast-modal').style.display = 'none';
-      byId('broadcast-message').value = '';
-      // Reset checkboxes
-      document.querySelectorAll('.persona-checkbox').forEach(cb => {
-        cb.classList.remove('selected');
-        cb.querySelector('input').checked = false;
-      });
-    }
-    
-    function togglePersonaSelection(personaId) {
-      const checkbox = byId(`broadcast-${personaId}`);
-      const container = checkbox.closest('.persona-checkbox');
-      
-      checkbox.checked = !checkbox.checked;
-      container.classList.toggle('selected', checkbox.checked);
-    }
-    
-    function sendBroadcast() {
-      const message = byId('broadcast-message').value.trim();
-      if (!message) return;
-      
-      const selectedPersonaIds = [];
-      document.querySelectorAll('.persona-checkbox input:checked').forEach(cb => {
-        selectedPersonaIds.push(cb.id.replace('broadcast-', ''));
-      });
-      
-      if (selectedPersonaIds.length === 0) return;
-      
-      // Send the message to selected personas
-      selectedPersonaIds.forEach(pid => {
-        addPersonaMessage(pid, 'Broadcast Update', message, 'user');
         
-        // Simulate persona acknowledging the update
-        setTimeout(() => {
-          const responses = {
-            'product-manager': `Thank you for the update! I'll revise my **Product Requirements Document** and **Market Analysis** to incorporate this new information. This will help ensure our deliverables stay aligned with the latest insights.`,
-            'solution-architect': `Update received! I'll review my **System Architecture** and **Technical Specifications** to account for these changes. This may impact our technology stack recommendations.`,
-            'program-manager': `Noted! I'll update the **Project Timeline** and **Task Breakdown** to reflect these new requirements. This might affect our milestone dates and resource allocation.`,
-            'design-buddy': `Great insight! I'll revise the **User Journey Maps** and **UI Wireframes** based on this update. This will help create a better user experience aligned with the new direction.`,
-            'executive': `Excellent strategic update! I'll incorporate this into our **Project Vision** and **Strategic Brief** to ensure all team deliverables remain aligned with our business objectives.`
-          };
-          
-          const response = responses[pid] || `Update acknowledged! I'll revise my deliverables to incorporate this new information.`;
-          addPersonaMessage(pid, personas[pid].name, response, 'ai');
-        }, 1000 + Math.random() * 2000);
-      });
-      
-      // Show confirmation in main chat
-      addMessage('System', `Update broadcasted to ${selectedPersonaIds.length} persona(s): ${selectedPersonaIds.map(pid => personas[pid].name).join(', ')}`, 'system');
-      
-      closeBroadcastModal();
+        const input = byId('executive-input');
+        input.placeholder = 'Describe your idea or project...';
+      }
     }
+    
+
     
     function interruptWorkflow() {
       workflowInterrupted = true;
@@ -1348,16 +1286,67 @@
       addMessage('System', '🔄 Workflow reset. You can now provide new instructions to the team.', 'system');
     }
     
-    function openBroadcastFromPersona(personaId) {
-      // Pre-select the current persona's linked personas
-      openBroadcastModal();
+    function toggleBroadcastMode() {
+      broadcastMode = !broadcastMode;
+      const indicator = byId('broadcast-indicator');
+      const modeText = byId('broadcast-mode-text');
+      const broadcastBtn = byId('btn-broadcast-mode');
       
-      // Auto-populate message context
-      const messageInput = byId('broadcast-message');
-      messageInput.placeholder = `Share an update from ${personas[personaId].name} with linked personas...`;
-      messageInput.value = `Update from ${personas[personaId].name}: `;
-      messageInput.focus();
-      messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length);
+      if (broadcastMode) {
+        indicator.style.display = 'block';
+        modeText.textContent = 'Exit Broadcast';
+        broadcastBtn.style.background = '#ff9500';
+        broadcastBtn.style.color = 'white';
+        
+        // Update placeholder
+        const input = byId('executive-input');
+        input.placeholder = 'Type message to broadcast to all selected personas...';
+      } else {
+        indicator.style.display = 'none';
+        modeText.textContent = 'Broadcast';
+        broadcastBtn.style.background = '';
+        broadcastBtn.style.color = '';
+        
+        // Reset placeholder
+        updateInputPlaceholder();
+      }
+    }
+    
+    function updateInputPlaceholder() {
+      const input = byId('executive-input');
+      if (currentActivePersona) {
+        input.placeholder = `Ask ${personas[currentActivePersona].name} a follow-up question...`;
+      } else {
+        input.placeholder = 'Describe your idea or project...';
+      }
+    }
+    
+    function broadcastMessage(message) {
+      // Send to all selected personas
+      selectedPersonas.forEach(pid => {
+        addPersonaMessage(pid, 'Broadcast Update', message, 'user');
+        
+        // Simulate persona acknowledging the update
+        setTimeout(() => {
+          const responses = {
+            'product-manager': `Thank you for the update! I'll revise my **Product Requirements Document** and **Market Analysis** to incorporate this new information.`,
+            'solution-architect': `Update received! I'll review my **System Architecture** and **Technical Specifications** to account for these changes.`,
+            'program-manager': `Noted! I'll update the **Project Timeline** and **Task Breakdown** to reflect these new requirements.`,
+            'design-buddy': `Great insight! I'll revise the **User Journey Maps** and **UI Wireframes** based on this update.`,
+            'executive': `Excellent strategic update! I'll incorporate this into our **Project Vision** and **Strategic Brief**.`
+          };
+          
+          const response = responses[pid] || `Update acknowledged! I'll revise my deliverables to incorporate this new information.`;
+          addPersonaMessage(pid, personas[pid].name, response, 'ai');
+        }, 1000 + Math.random() * 2000);
+      });
+      
+      // Show confirmation in main chat
+      addMessage('System', `📢 Message broadcasted to all ${selectedPersonas.length} personas`, 'system');
+      
+      // Exit broadcast mode
+      broadcastMode = false;
+      toggleBroadcastMode();
     }
     
     function clearPersonaChat(personaId) {
@@ -1411,15 +1400,15 @@
         wrapper.innerHTML = `
           <div class="persona-header">
             <div class="persona-avatar" style="background:${p.color};">${p.shortName}</div>
-            <div class="persona-details">
-              <h3>${p.name}</h3>
-              <p>${p.description}</p>
-            </div>
-            <div class="persona-header-actions">
-              <button class="action-btn" onclick="openBroadcastFromPersona('${personaId}')" title="Share update with linked personas">
-                <span>📤</span> Share Update
-              </button>
-            </div>
+                          <div class="persona-details">
+                <h3>${p.name}</h3>
+                <p>${p.description}</p>
+              </div>
+              <div class="persona-header-actions">
+                <button class="action-btn" onclick="clearPersonaChat('${personaId}')" title="Clear this persona's chat">
+                  <span>🗑️</span> Clear Chat
+                </button>
+              </div>
           </div>
           <div class="persona-content">
             <div class="chat-interface" style="margin-bottom: 24px;">
@@ -1698,13 +1687,21 @@
       const idea = input.value.trim(); 
       if (!idea) return;
       
-      // If we have an active persona, send to that persona
-      if (currentActivePersona) {
+      // Handle broadcast mode
+      if (broadcastMode) {
+        addMessage('You', idea, 'user');
+        input.value = '';
+        broadcastMessage(idea);
+        return;
+      }
+      
+      // If we have an active persona (after workflow started), send to that persona
+      if (currentActivePersona && currentView === 'overview') {
         sendPersonaMessage(currentActivePersona);
         return;
       }
       
-      // Otherwise, handle as executive idea
+      // Otherwise, handle as executive idea (initial submission in chat view)
       addMessage('You', idea, 'user'); 
       input.value = '';
       setTimeout(() => generateActionPlan(idea), 800);
@@ -1894,7 +1891,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Top nav
       document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => showView(i.dataset.view)));
-      byId('btn-new').addEventListener('click', createNewProject);
       byId('btn-start-project').addEventListener('click', () => showView('setup'));
       byId('btn-update-team').addEventListener('click', () => showView('setup'));
       byId('btn-continue-chat').addEventListener('click', () => showView('chat'));
@@ -1912,7 +1908,7 @@
       byId('btn-approve').addEventListener('click', approveActionPlan);
       
       // New chat controls
-      byId('btn-broadcast').addEventListener('click', openBroadcastModal);
+      byId('btn-broadcast-mode').addEventListener('click', toggleBroadcastMode);
       byId('btn-interrupt').addEventListener('click', interruptWorkflow);
       byId('btn-reset-chat').addEventListener('click', () => {
         if (confirm('Are you sure you want to reset the chat? This will clear all messages.')) {
@@ -1923,10 +1919,6 @@
       // Modal close on background click
       byId('deliverable-modal').addEventListener('click', (e) => {
         if (e.target === byId('deliverable-modal')) closeDeliverableModal();
-      });
-      
-      byId('broadcast-modal').addEventListener('click', (e) => {
-        if (e.target === byId('broadcast-modal')) closeBroadcastModal();
       });
 
       updateProjectSelector();
