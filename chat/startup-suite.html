@@ -128,6 +128,18 @@
     .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280; }
     .close-btn:hover { color: #374151; }
 
+    /* Additions: persona actions and follow-up sharing */
+    .persona-actions { margin-left: auto; display: flex; gap: 8px; }
+    .pill-toggle { display: inline-flex; align-items: center; gap: 8px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 999px; padding: 6px 10px; font-size: 0.8rem; color: #374151; }
+    .followup-options { display: flex; align-items: center; gap: 12px; color: #6b7280; font-size: 0.85rem; margin-top: 6px; }
+
+    /* Tweak modal */
+    .tweak-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; z-index: 1100; }
+    .tweak-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 12px; padding: 22px; width: 560px; max-width: 92vw; }
+    .tweak-content h3 { margin-bottom: 10px; color: #111827; }
+    .tweak-actions { display:flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    .tweak-row { margin-top: 10px; color:#6b7280; font-size: 0.9rem; }
+
     @media (max-width: 768px) {
       .personas-grid { grid-template-columns: 1fr; }
       .input-section { flex-direction: column; }
@@ -174,6 +186,9 @@
           <div style="flex:1 1 auto"></div>
           <button class="header-btn" id="btn-new">New Project</button>
           <button class="header-btn" id="btn-settings">Settings</button>
+          <button class="header-btn" id="btn-pause-all">Pause All</button>
+          <button class="header-btn" id="btn-resume-all">Resume All</button>
+          <button class="header-btn" id="btn-tweak-all">Tweak & Resend</button>
         </div>
       </div>
 
@@ -259,6 +274,19 @@
     </div>
   </div>
 
+  <!-- Tweak & Resend Modal -->
+  <div class="tweak-modal" id="tweak-modal">
+    <div class="tweak-content">
+      <h3 id="tweak-title">Tweak & Resend</h3>
+      <textarea id="tweak-input" placeholder="Describe the change or follow-up..." style="width:100%; min-height:120px; border:1px solid #e5e7eb; border-radius:8px; padding:10px; font-family:inherit;"></textarea>
+      <div class="tweak-row"><label><input type="checkbox" id="tweak-propagate" checked> Propagate to linked personas</label></div>
+      <div class="tweak-actions">
+        <button class="header-btn" onclick="closeTweakModal()">Cancel</button>
+        <button class="header-btn" id="tweak-submit">Send</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Personas configuration
     const personas = {
@@ -277,6 +305,10 @@
     const personaStates = {};
     const instances = []; // {id, personaId, name}
     const tasks = []; // {id, personaId, title}
+
+    // Dependencies
+    const defaultDependencies = { executive: [], 'product-manager': ['executive'], 'solution-architect': ['product-manager'], 'program-manager': ['solution-architect'], 'design-buddy': ['product-manager'] };
+    let currentDependencies = {};
 
     Object.keys(personas).forEach(id => {
       personaStates[id] = { status: 'idle', thinking: 'Ready to contribute to the project...', progress: 0, dependencies: [], deliverables: [] };
@@ -322,6 +354,11 @@
       
       addPersonaMessage(personaId, 'You', message, 'user');
       input.value = '';
+      
+      const share = byId(`${personaId}-share-linked`);
+      if (share && share.checked) {
+        propagateUpdateToLinked(personaId, message);
+      }
       
       // Simulate AI response
       setTimeout(() => {
@@ -445,6 +482,11 @@
           <div class="persona-header">
             <div class="persona-avatar" style="background:${p.color};">${p.shortName}</div>
             <div class="persona-details"><h3>${p.name}</h3><p>${p.description}</p></div>
+            <div class="persona-actions">
+              <button class="header-btn" onclick="interruptPersona('${personaId}')">Pause</button>
+              <button class="header-btn" onclick="resumePersona('${personaId}')">Resume</button>
+              <button class="header-btn" onclick="openTweakModal('${personaId}')">Tweak & Resend</button>
+            </div>
           </div>
           <div class="persona-content">
             <div class="chat-interface" style="margin-bottom: 20px;">
@@ -452,7 +494,12 @@
                 <div class="message system"><div class="message-header">System</div>${p.name} is ready to help with your project.</div>
               </div>
               <div class="input-section">
-                <textarea id="${personaId}-input" placeholder="Ask ${p.name} anything..."></textarea>
+                <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                  <textarea id="${personaId}-input" placeholder="Ask ${p.name} anything..."></textarea>
+                  <div class="followup-options">
+                    <label class="pill-toggle"><input type="checkbox" id="${personaId}-share-linked" checked style="margin-right:6px;"> Share with linked personas</label>
+                  </div>
+                </div>
                 <button class="btn" onclick="sendPersonaMessage('${personaId}')">Send</button>
               </div>
             </div>
@@ -749,8 +796,9 @@
     }
 
     function setupDependencies() {
-      const deps = { executive: [], 'product-manager': ['executive'], 'solution-architect': ['product-manager'], 'program-manager': ['solution-architect'], 'design-buddy': ['product-manager'] };
-      selectedPersonas.forEach(pid => { personaStates[pid].dependencies = (deps[pid] || []).map(d => personas[d]?.name).filter(Boolean); });
+      currentDependencies = {};
+      selectedPersonas.forEach(pid => { currentDependencies[pid] = (defaultDependencies[pid] || []).filter(d => selectedPersonas.includes(d)); });
+      selectedPersonas.forEach(pid => { personaStates[pid].dependencies = (currentDependencies[pid] || []).map(d => personas[d]?.name).filter(Boolean); });
     }
 
     function simulateWorkflow() {
@@ -777,13 +825,93 @@
     }
 
     function simulatePersonaWork(personaId, onComplete) {
-      const steps = ['Starting analysis...', 'Gathering information...', 'Processing requirements...', 'Creating deliverables...', 'Finalizing work...', 'Task completed!'];
-      let i = 0; const tick = setInterval(() => {
-        const progress = (i + 1) * (100 / steps.length); personaStates[personaId].progress = Math.round(progress);
-        let thinking = steps[i]; if (i === steps.length - 1) { thinking = 'Task completed! Deliverables ready for review.'; updatePersonaStatus(personaId,'complete',thinking); } else { updatePersonaStatus(personaId,'working',thinking); }
+      const defaultSteps = ['Starting analysis...', 'Gathering information...', 'Processing requirements...', 'Creating deliverables...', 'Finalizing work...', 'Task completed!'];
+      const state = personaStates[personaId];
+      if (!state.work) state.work = { steps: defaultSteps, index: 0, intervalId: null, onComplete: null };
+      if (!state.work.steps) state.work.steps = defaultSteps;
+      if (typeof state.work.index !== 'number') state.work.index = 0;
+      state.work.onComplete = onComplete || state.work.onComplete || null;
+      if (state.work.intervalId) { clearInterval(state.work.intervalId); state.work.intervalId = null; }
+      state.work.intervalId = setInterval(() => {
+        const i = state.work.index;
+        const steps = state.work.steps;
+        const progress = (i + 1) * (100 / steps.length);
+        state.progress = Math.max(0, Math.min(100, Math.round(progress)));
+        let thinking = steps[i];
+        if (i === steps.length - 1) {
+          thinking = 'Task completed! Deliverables ready for review.';
+          updatePersonaStatus(personaId, 'complete', thinking);
+          clearInterval(state.work.intervalId); state.work.intervalId = null; state.work.index = 0; // reset for next run
+          if (state.work.onComplete) state.work.onComplete();
+        } else {
+          updatePersonaStatus(personaId, 'working', thinking);
+          state.work.index = i + 1;
+        }
         addMessage(personas[personaId].name, thinking, 'ai');
-        i++; if (i >= steps.length) { clearInterval(tick); if (onComplete) onComplete(); }
       }, 1200 + Math.random() * 1200);
+    }
+
+    function interruptPersona(personaId) {
+      const state = personaStates[personaId];
+      if (state?.work?.intervalId) { clearInterval(state.work.intervalId); state.work.intervalId = null; }
+      updatePersonaStatus(personaId, 'waiting', 'Paused by user.');
+    }
+
+    function resumePersona(personaId) {
+      const state = personaStates[personaId];
+      if (!state.work) state.work = { steps: null, index: 0, intervalId: null };
+      simulatePersonaWork(personaId, state.work.onComplete);
+    }
+
+    function restartPersonaWork(personaId, stepsOverride) {
+      const state = personaStates[personaId];
+      state.progress = 0;
+      state.work = { steps: stepsOverride || null, index: 0, intervalId: null, onComplete: null };
+      simulatePersonaWork(personaId);
+    }
+
+    function getDownstreamPersonas(personaId) {
+      // reverse dependency graph
+      const downstream = selectedPersonas.filter(pid => (currentDependencies[pid] || []).includes(personaId));
+      return downstream;
+    }
+
+    function propagateUpdateToLinked(sourcePersonaId, message) {
+      const downstream = getDownstreamPersonas(sourcePersonaId);
+      downstream.forEach(pid => {
+        addPersonaMessage(pid, 'System', `Update from ${personas[sourcePersonaId].name}: ${message}`, 'system');
+        updatePersonaStatus(pid, 'working', `Revising deliverables based on ${personas[sourcePersonaId].name}'s update...`);
+        const revisionSteps = ['Assessing update...', 'Revising work...', 'Validating changes...', 'Finalizing update...', 'Update integrated'];
+        restartPersonaWork(pid, revisionSteps);
+      });
+    }
+
+    function interruptAll() { selectedPersonas.forEach(pid => interruptPersona(pid)); }
+    function resumeAll() { selectedPersonas.forEach(pid => resumePersona(pid)); }
+
+    // Tweak modal handlers
+    let tweakTargetPersona = null;
+    function openTweakModal(personaId = null) {
+      tweakTargetPersona = personaId;
+      byId('tweak-title').textContent = personaId ? `Tweak & Resend to ${personas[personaId].name}` : 'Tweak & Resend to Team';
+      byId('tweak-input').value = '';
+      byId('tweak-modal').style.display = 'block';
+    }
+    function closeTweakModal() { byId('tweak-modal').style.display = 'none'; tweakTargetPersona = null; }
+    function submitTweak() {
+      const text = byId('tweak-input').value.trim(); if (!text) { closeTweakModal(); return; }
+      const propagate = byId('tweak-propagate').checked;
+      if (tweakTargetPersona) {
+        addPersonaMessage(tweakTargetPersona, 'You', text, 'user');
+        if (propagate) propagateUpdateToLinked(tweakTargetPersona, text);
+        restartPersonaWork(tweakTargetPersona);
+      } else {
+        selectedPersonas.forEach(pid => {
+          addPersonaMessage(pid, 'Executive Update', text, 'system');
+          restartPersonaWork(pid);
+        });
+      }
+      closeTweakModal();
     }
 
     // High-level actions
@@ -828,6 +956,9 @@
       byId('btn-start-project').addEventListener('click', () => showView('setup'));
       byId('btn-update-team').addEventListener('click', () => showView('setup'));
       byId('btn-continue-chat').addEventListener('click', () => showView('chat'));
+      byId('btn-pause-all').addEventListener('click', interruptAll);
+      byId('btn-resume-all').addEventListener('click', resumeAll);
+      byId('btn-tweak-all').addEventListener('click', () => openTweakModal(null));
 
       // Project selector
       byId('project-selector').addEventListener('change', (e) => switchProject(e.target.value));
@@ -840,10 +971,14 @@
       byId('btn-send').addEventListener('click', submitExecutiveIdea);
       byId('btn-refine').addEventListener('click', refineActionPlan);
       byId('btn-approve').addEventListener('click', approveActionPlan);
+      byId('tweak-submit').addEventListener('click', submitTweak);
 
       // Modal close on background click
       byId('deliverable-modal').addEventListener('click', (e) => {
         if (e.target === byId('deliverable-modal')) closeDeliverableModal();
+      });
+      byId('tweak-modal').addEventListener('click', (e) => {
+        if (e.target === byId('tweak-modal')) closeTweakModal();
       });
 
       updateProjectSelector();
