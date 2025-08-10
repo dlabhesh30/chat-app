@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive AI Team Management Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid #e0e6ed;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #e0e6ed;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-nav {
+            padding: 0 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .nav-item:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .nav-item.active {
+            background: #f0f4ff;
+            color: #4f46e5;
+            border-left: 3px solid #4f46e5;
+        }
+
+        .persona-list {
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+
+        .persona-sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .persona-sidebar-item:hover {
+            background: #f9fafb;
+        }
+
+        .persona-sidebar-item.active {
+            background: #f0f4ff;
+        }
+
+        .persona-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-right: 12px;
+        }
+
+        .persona-info {
+            flex: 1;
+        }
+
+        .persona-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 2px;
+        }
+
+        .persona-status {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            position: absolute;
+            top: 8px;
+            right: 10px;
+        }
+
+        .status-working { background: #fbbf24; }
+        .status-complete { background: #10b981; }
+        .status-waiting { background: #ef4444; }
+        .status-idle { background: #9ca3af; }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .top-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .view-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            min-height: calc(100vh - 160px);
+        }
+
+        .view {
+            display: none;
+            padding: 30px;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .welcome-section {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .welcome-section h2 {
+            color: #1f2937;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .welcome-section p {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-bottom: 40px;
+        }
+
+        /* Team Selection Styles */
+        .team-selection {
+            margin: 40px 0;
+        }
+
+        .team-selection h3 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .personas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .persona-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+            position: relative;
+        }
+
+        .persona-card:hover {
+            border-color: #8b5cf6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+        }
+
+        .persona-card.selected {
+            border-color: #8b5cf6;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+        }
+
+        .persona-card h4 {
+            color: #1f2937;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .persona-card p {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .selection-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            color: white;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .persona-card.selected .selection-indicator {
+            display: flex;
+        }
+
+        /* Progress Overview */
+        .progress-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .progress-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .progress-card:hover {
+            border-color: #8b5cf6;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .progress-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .progress-card h4 {
+            color: #1f2937;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .progress-percentage {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-left: auto;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #a855f7);
+            transition: width 0.3s ease;
+        }
+
+        .selected-team-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .team-member-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .team-member-card:hover {
+            background: #f1f5f9;
+            border-color: #8b5cf6;
+        }
+
+        .team-member-info {
+            flex: 1;
+        }
+
+        .team-member-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .team-member-status {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        /* Chat Interface */
+        .chat-interface {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .team-info {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .team-info h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .selected-personas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .persona-tag {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .chat-messages {
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e1e5e9;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .message.user {
+            background: #e3f2fd;
+            margin-left: 50px;
+        }
+
+        .message.ai {
+            background: #f3e5f5;
+            margin-right: 50px;
+        }
+
+        .message.system {
+            background: #e8f5e8;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .input-section textarea {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .input-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .action-plan {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .action-plan h4 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .action-plan ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .action-plan li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f5deb3;
+        }
+
+        .action-plan li:last-child {
+            border-bottom: none;
+        }
+
+        /* Persona Individual View */
+        .persona-view {
+            padding: 0;
+        }
+
+        .persona-header {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            padding: 25px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .persona-header .persona-avatar {
+            width: 48px;
+            height: 48px;
+            font-size: 1.2rem;
+        }
+
+        .persona-details h3 {
+            color: #1f2937;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .persona-details p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .persona-content {
+            padding: 30px;
+        }
+
+        .persona-thinking {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .persona-thinking h4 {
+            color: #475569;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            margin-bottom: 12px;
+        }
+
+        .thinking-content {
+            color: #334155;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .deliverables-section {
+            margin-top: 30px;
+        }
+
+        .deliverables-section h4 {
+            color: #1f2937;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .deliverable-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .deliverable-item h5 {
+            color: #374151;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .deliverable-item p {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Dependencies and Waiting */
+        .dependency-info {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dependency-info .icon {
+            width: 20px;
+            height: 20px;
+            background: #f59e0b;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dependency-text {
+            color: #92400e;
+            font-size: 0.9rem;
+        }
+
+        /* Preview Tooltip */
+        .preview-tooltip {
+            position: absolute;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            width: 300px;
+            z-index: 1000;
+            display: none;
+            top: 0;
+            left: 100%;
+            margin-left: 10px;
+        }
+
+        .preview-tooltip.show {
+            display: block;
+        }
+
+        .preview-header {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .preview-content {
+            color: #6b7280;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        /* Instance Management */
+        .instance-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #8b5cf6;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .workflow-steps {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .workflow-steps h4 {
+            color: #0369a1;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #bae6fd;
+        }
+
+        .workflow-step:last-child {
+            border-bottom: none;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #0ea5e9;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+            color: #0c4a6e;
+            font-size: 0.9rem;
+        }
+
+        .step-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .step-status.pending {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .step-status.active {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+                 .step-status.completed {
+             background: #d1fae5;
+             color: #065f46;
+         }
+
+         .step-number.completed {
+             background: #10b981;
+         }
+
+         .step-number.active {
+             background: #f59e0b;
+             animation: pulse 2s infinite;
+         }
+
+         @keyframes pulse {
+             0% { transform: scale(1); }
+             50% { transform: scale(1.1); }
+             100% { transform: scale(1); }
+         }
+
+         /* Notification System */
+         .notification {
+             position: fixed;
+             top: 20px;
+             right: 20px;
+             background: #10b981;
+             color: white;
+             padding: 15px 20px;
+             border-radius: 8px;
+             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+             z-index: 1000;
+             transform: translateX(400px);
+             transition: transform 0.3s ease;
+         }
+
+         .notification.show {
+             transform: translateX(0);
+         }
+
+         .notification.success {
+             background: #10b981;
+         }
+
+         .notification.info {
+             background: #3b82f6;
+         }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Executive Suite</h2>
+                <p style="color: #6b7280; font-size: 0.8rem;">AI Team Orchestration</p>
+            </div>
+            
+            <div class="sidebar-nav">
+                <div class="nav-item active" onclick="showView('overview')">
+                    🏠 Executive Dashboard
+                </div>
+                <div class="nav-item" onclick="showView('setup')">
+                    👥 Team Assembly
+                </div>
+                <div class="nav-item" onclick="showView('chat')" id="chat-nav" style="display: none;">
+                    💬 Executive Chat
+                </div>
+            </div>
+            
+            <div class="persona-list" id="persona-sidebar">
+                <h4 style="color: #6b7280; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 15px 10px; font-weight: 600;">Team Members</h4>
+                <!-- Personas will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="top-header">
+                <h1 id="view-title">Executive Dashboard</h1>
+                <div class="header-actions">
+                    <button class="header-btn" onclick="resetWorkflow()">New Project</button>
+                    <button class="header-btn" onclick="showView('setup')">Team Settings</button>
+                </div>
+            </div>
+            
+            <div class="content-area">
+                <div class="view-container">
+                    <!-- Executive Welcome View -->
+                    <div class="view active" id="overview-view">
+                        <div class="welcome-section">
+                            <h2>Welcome, Executive!</h2>
+                            <p>Your AI team is ready to bring your vision to life. What's on your mind today?</p>
+                            <div style="text-align: center; margin-top: 30px;">
+                                <button class="btn" onclick="showView('setup')">Assemble Your Team</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Active Project Overview -->
+                        <div id="active-project-section" style="display: none;">
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <h3 style="color: #1f2937; margin-bottom: 10px;">Active Project</h3>
+                                <p style="color: #6b7280;" id="project-description">Building a revolutionary product...</p>
+                            </div>
+                            
+                            <div class="team-overview-section">
+                                <h4 style="color: #1f2937; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                    <span>👥</span> Your Team
+                                </h4>
+                                <div class="selected-team-display" id="selected-team-overview">
+                                    <!-- Selected team members will be displayed here -->
+                                </div>
+                            </div>
+                            
+                            <div id="progress-overview-section">
+                                <h4 style="color: #1f2937; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                                    <span>📈</span> Progress Overview
+                                </h4>
+                                <div class="progress-overview" id="progress-overview">
+                                    <!-- Progress cards will be added dynamically -->
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 30px;">
+                                <button class="btn btn-secondary" onclick="resetWorkflow()">Start New Project</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Team Assembly View -->
+                    <div class="view" id="setup-view">
+                        <div class="team-selection">
+                            <h3>Assemble Your AI Team</h3>
+                            <p style="text-align: center; color: #6b7280; margin-bottom: 30px;">
+                                Select the AI personas you want on your team to execute your vision:
+                            </p>
+                            
+                            <div class="personas-grid" id="personas-grid">
+                                <!-- Personas will be dynamically loaded -->
+                            </div>
+                            
+                            <div style="text-align: center; margin-top: 30px;">
+                                <button class="btn" onclick="proceedToChat()" id="proceed-to-chat" disabled>Next: Define Your Vision</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Executive Chat View -->
+                    <div class="view" id="chat-view">
+                        <div class="chat-interface">
+                            <div class="team-info">
+                                <h4>🎯 Your Assembled Team</h4>
+                                <div class="selected-personas" id="selected-personas-display"></div>
+                            </div>
+                            
+                            <div class="workflow-steps" id="workflow-preview" style="display: none;">
+                                <h4>📋 Execution Workflow</h4>
+                                <div id="workflow-steps-content">
+                                    <!-- Workflow steps will be shown here -->
+                                </div>
+                            </div>
+                            
+                            <div class="chat-messages" id="chat-messages">
+                                <div class="message system">
+                                    <div class="message-header">System</div>
+                                    Team assembled and ready. Please share your vision or idea to get started.
+                                </div>
+                            </div>
+                            
+                            <div class="input-section">
+                                <textarea id="executive-input" placeholder="Describe your vision, idea, or project in detail..."></textarea>
+                                <button class="btn" onclick="submitExecutiveIdea()" id="submit-idea-btn">Share Vision</button>
+                            </div>
+                            
+                            <div id="action-plan-section" style="display: none;">
+                                <div class="action-plan">
+                                    <h4>🎯 Executive Action Plan</h4>
+                                    <div id="action-plan-content"></div>
+                                    <div style="text-align: center; margin-top: 20px; display: flex; gap: 15px; justify-content: center;">
+                                        <button class="btn btn-secondary" onclick="refineActionPlan()">Refine Plan</button>
+                                        <button class="btn btn-success" onclick="approveActionPlan()">🚀 Give Green Light</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Individual Persona Views -->
+                    <div id="persona-views-container">
+                        <!-- Persona views will be dynamically created -->
+                    </div>
+                </div>
+            </div>
+        </div>
+         </div>
+
+    <!-- Notification System -->
+    <div id="notification" class="notification">
+        <div id="notification-content"></div>
+    </div>
+
+    <script>
+        let selectedPersonas = [];
+        let currentView = 'overview';
+        let actionPlan = null;
+        let executionProgress = {};
+        let personaStates = {};
+        let currentProject = null;
+        let teamInstances = {};
+
+        // Available personas in the system - this would be dynamic from backend
+        const availablePersonas = {
+            'executive': {
+                name: 'Executive',
+                description: 'Strategic vision and oversight. Sets objectives and provides high-level direction for the entire project.',
+                color: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                shortName: 'EX',
+                required: true
+            },
+            'product-manager': {
+                name: 'Product Manager',
+                description: 'Conducts market research, defines requirements, and creates detailed product specifications.',
+                color: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+                shortName: 'PM',
+                required: false
+            },
+            'solution-architect': {
+                name: 'Solution Architect',
+                description: 'Converts functional requirements into technical specifications and system design.',
+                color: 'linear-gradient(135deg, #10b981, #059669)',
+                shortName: 'SA',
+                required: false
+            },
+            'program-manager': {
+                name: 'Program Manager',
+                description: 'Creates project plans, manages timelines, and breaks down work into actionable tasks.',
+                color: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                shortName: 'PGM',
+                required: false
+            },
+            'design-buddy': {
+                name: 'Design Buddy',
+                description: 'Creates user experience designs, wireframes, and ensures design consistency.',
+                color: 'linear-gradient(135deg, #ec4899, #db2777)',
+                shortName: 'DB',
+                required: false
+            }
+        };
+
+        // Initialize persona states
+        function initializePersonaStates() {
+            Object.keys(availablePersonas).forEach(id => {
+                personaStates[id] = {
+                    status: 'idle',
+                    thinking: `Ready to contribute to the project...`,
+                    progress: 0,
+                    dependencies: [],
+                    deliverables: [],
+                    instanceId: null,
+                    taskId: null
+                };
+            });
+        }
+
+        // Dynamic persona loading
+        function loadAvailablePersonas() {
+            const grid = document.getElementById('personas-grid');
+            grid.innerHTML = '';
+            
+            Object.entries(availablePersonas).forEach(([id, persona]) => {
+                const card = document.createElement('div');
+                card.className = 'persona-card';
+                card.onclick = () => togglePersona(id);
+                
+                // Auto-select executive if required
+                if (persona.required && !selectedPersonas.includes(id)) {
+                    selectedPersonas.push(id);
+                    card.classList.add('selected');
+                }
+                
+                card.innerHTML = `
+                    <div class="persona-avatar" style="background: ${persona.color}; width: 48px; height: 48px; margin: 0 auto 15px; font-size: 1.2rem;">${persona.shortName}</div>
+                    <h4>${persona.name}${persona.required ? ' *' : ''}</h4>
+                    <p>${persona.description}</p>
+                    <div class="selection-indicator">✓</div>
+                    ${persona.required ? '<div class="instance-badge">Required</div>' : ''}
+                `;
+                
+                if (persona.required) {
+                    card.classList.add('selected');
+                }
+                
+                grid.appendChild(card);
+            });
+            
+            updateProceedButton();
+        }
+
+        // Update sidebar with selected personas
+        function updatePersonaSidebar() {
+            const sidebar = document.getElementById('persona-sidebar');
+            const header = sidebar.querySelector('h4');
+            sidebar.innerHTML = '';
+            sidebar.appendChild(header);
+            
+            selectedPersonas.forEach(personaId => {
+                const persona = availablePersonas[personaId];
+                const sidebarItem = document.createElement('div');
+                sidebarItem.className = 'persona-sidebar-item';
+                sidebarItem.onclick = () => showPersonaView(personaId);
+                sidebarItem.onmouseenter = (e) => showPreview(e, personaId);
+                sidebarItem.onmouseleave = hidePreview;
+                
+                sidebarItem.innerHTML = `
+                    <div class="persona-avatar" style="background: ${persona.color};">${persona.shortName}</div>
+                    <div class="persona-info">
+                        <div class="persona-name">${persona.name}</div>
+                        <div class="persona-status" id="${personaId}-status">Ready to work</div>
+                    </div>
+                    <div class="status-indicator status-idle" id="${personaId}-indicator"></div>
+                    <div class="preview-tooltip" id="preview-${personaId}">
+                        <div class="preview-header">${persona.name} Progress</div>
+                        <div class="preview-content" id="preview-${personaId}-content">Ready to contribute to the project...</div>
+                    </div>
+                `;
+                
+                sidebar.appendChild(sidebarItem);
+            });
+        }
+
+        // Create persona views dynamically
+        function createPersonaViews() {
+            const container = document.getElementById('persona-views-container');
+            container.innerHTML = '';
+            
+            selectedPersonas.forEach(personaId => {
+                const persona = availablePersonas[personaId];
+                const view = document.createElement('div');
+                view.className = 'view persona-view';
+                view.id = `${personaId}-persona-view`;
+                
+                view.innerHTML = `
+                    <div class="persona-header">
+                        <div class="persona-avatar" style="background: ${persona.color};">${persona.shortName}</div>
+                        <div class="persona-details">
+                            <h3>${persona.name}</h3>
+                            <p>${persona.description}</p>
+                        </div>
+                        <div class="instance-badge" id="${personaId}-instance-badge">Instance #1</div>
+                    </div>
+                    <div class="persona-content">
+                        <div class="persona-thinking">
+                            <h4>Current Thinking</h4>
+                            <div class="thinking-content" id="${personaId}-thinking">
+                                Ready to contribute to the project...
+                            </div>
+                        </div>
+                        <div id="${personaId}-dependencies"></div>
+                        <div class="deliverables-section">
+                            <h4>Deliverables</h4>
+                            <div id="${personaId}-deliverables">
+                                ${getPersonaDeliverables(personaId)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(view);
+            });
+        }
+
+        function getPersonaDeliverables(personaId) {
+            const deliverables = {
+                'executive': `
+                    <div class="deliverable-item">
+                        <h5>Project Vision Document</h5>
+                        <p>Strategic objectives and high-level project goals</p>
+                    </div>
+                    <div class="deliverable-item">
+                        <h5>Success Metrics Definition</h5>
+                        <p>Key performance indicators and success criteria</p>
+                    </div>
+                `,
+                'product-manager': `
+                    <div class="deliverable-item">
+                        <h5>Market Research Report</h5>
+                        <p>Competitor analysis and market opportunities</p>
+                    </div>
+                    <div class="deliverable-item">
+                        <h5>Product Requirements Document</h5>
+                        <p>Detailed functional and non-functional requirements</p>
+                    </div>
+                    <div class="deliverable-item">
+                        <h5>User Personas & Journey Maps</h5>
+                        <p>Target user profiles and customer journey analysis</p>
+                    </div>
+                `,
+                'solution-architect': `
+                    <div class="deliverable-item">
+                        <h5>System Architecture Document</h5>
+                        <p>Technical specifications and implementation strategy</p>
+                    </div>
+                    <div class="deliverable-item">
+                        <h5>Technology Stack Recommendations</h5>
+                        <p>Recommended tools and frameworks for development</p>
+                    </div>
+                    <div class="deliverable-item">
+                        <h5>Implementation Plan</h5>
+                        <p>Detailed technical roadmap and development phases</p>
+                    </div>
+                `,
+                'program-manager': `
+                    <div class="deliverable-item">
+                        <h5>Project Timeline</h5>
+                        <p>Detailed schedule with milestones and deadlines</p>
+                    </div>
+                    <div class="deliverable-item">
+                        <h5>Epic & Story Breakdown</h5>
+                        <p>JIRA epics and user stories with acceptance criteria</p>
+                    </div>
+                    <div class="deliverable-item">
+                        <h5>Resource Allocation Plan</h5>
+                        <p>Team assignments and capacity planning</p>
+                    </div>
+                `,
+                'design-buddy': `
+                    <div class="deliverable-item">
+                        <h5>User Journey Maps</h5>
+                        <p>Detailed user flows and interaction patterns</p>
+                    </div>
+                    <div class="deliverable-item">
+                        <h5>UI Wireframes & Mockups</h5>
+                        <p>Visual mockups and design system components</p>
+                    </div>
+                    <div class="deliverable-item">
+                        <h5>Design System Guidelines</h5>
+                        <p>Style guide and component library specifications</p>
+                    </div>
+                `
+            };
+            
+            return deliverables[personaId] || '<div class="deliverable-item"><h5>Ready to contribute</h5><p>Waiting for project assignment</p></div>';
+        }
+
+        // View Management
+        function showView(viewName) {
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.persona-sidebar-item').forEach(item => item.classList.remove('active'));
+            
+            // Update views
+            document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+            
+            if (viewName === 'overview') {
+                document.getElementById('overview-view').classList.add('active');
+                document.querySelector('.nav-item[onclick="showView(\'overview\')"]').classList.add('active');
+                document.getElementById('view-title').textContent = 'Executive Dashboard';
+            } else if (viewName === 'setup') {
+                document.getElementById('setup-view').classList.add('active');
+                document.querySelector('.nav-item[onclick="showView(\'setup\')"]').classList.add('active');
+                document.getElementById('view-title').textContent = 'Team Assembly';
+                loadAvailablePersonas();
+            } else if (viewName === 'chat') {
+                document.getElementById('chat-view').classList.add('active');
+                document.querySelector('.nav-item[onclick="showView(\'chat\')"]').classList.add('active');
+                document.getElementById('view-title').textContent = 'Executive Command Center';
+                displaySelectedPersonas();
+                showWorkflowPreview();
+            }
+            
+            currentView = viewName;
+        }
+
+        function showPersonaView(personaId) {
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.persona-sidebar-item').forEach(item => item.classList.remove('active'));
+            
+            // Update views
+            document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+            
+            // Show persona view
+            const personaView = document.getElementById(`${personaId}-persona-view`);
+            if (personaView) {
+                personaView.classList.add('active');
+                const sidebarItem = document.querySelector(`.persona-sidebar-item[onclick*="${personaId}"]`);
+                if (sidebarItem) sidebarItem.classList.add('active');
+                document.getElementById('view-title').textContent = availablePersonas[personaId].name + ' - Instance #' + (teamInstances[personaId] || 1);
+            }
+            
+            currentView = `${personaId}-persona`;
+            updatePersonaView(personaId);
+        }
+
+        function updatePersonaView(personaId) {
+            const state = personaStates[personaId];
+            
+            // Update thinking content
+            const thinkingElement = document.getElementById(`${personaId}-thinking`);
+            if (thinkingElement) {
+                thinkingElement.textContent = state.thinking;
+            }
+            
+            // Update dependencies
+            const dependenciesContainer = document.getElementById(`${personaId}-dependencies`);
+            if (dependenciesContainer) {
+                if (state.dependencies.length > 0) {
+                    dependenciesContainer.innerHTML = `
+                        <div class="dependency-info">
+                            <div class="icon"></div>
+                            <div class="dependency-text">Waiting for: ${state.dependencies.join(', ')}</div>
+                        </div>
+                    `;
+                } else {
+                    dependenciesContainer.innerHTML = '';
+                }
+            }
+        }
+
+        // Persona selection
+        function togglePersona(personaId) {
+            const card = event.target.closest('.persona-card');
+            const persona = availablePersonas[personaId];
+            
+            // Don't allow deselecting required personas
+            if (persona.required && selectedPersonas.includes(personaId)) {
+                return;
+            }
+            
+            const index = selectedPersonas.indexOf(personaId);
+            
+            if (index > -1) {
+                selectedPersonas.splice(index, 1);
+                card.classList.remove('selected');
+            } else {
+                selectedPersonas.push(personaId);
+                card.classList.add('selected');
+            }
+            
+            updateProceedButton();
+        }
+
+        function updateProceedButton() {
+            const button = document.getElementById('proceed-to-chat');
+            button.disabled = selectedPersonas.length === 0;
+        }
+
+        function proceedToChat() {
+            if (selectedPersonas.length === 0) return;
+            
+            // Create instances and tasks for selected personas
+            createTeamInstances();
+            
+            // Update sidebar with selected personas
+            updatePersonaSidebar();
+            
+            // Create persona views
+            createPersonaViews();
+            
+            // Show chat navigation
+            document.getElementById('chat-nav').style.display = 'block';
+            
+            // Go to chat view
+            showView('chat');
+        }
+
+        function createTeamInstances() {
+            selectedPersonas.forEach(personaId => {
+                // Create instance ID and task ID for each persona
+                teamInstances[personaId] = Math.floor(Math.random() * 1000) + 1;
+                personaStates[personaId].instanceId = `${personaId}-${teamInstances[personaId]}`;
+                personaStates[personaId].taskId = `task-${Date.now()}-${personaId}`;
+                
+                console.log(`Created instance ${teamInstances[personaId]} for ${personaId} with task ${personaStates[personaId].taskId}`);
+            });
+        }
+
+        function displaySelectedPersonas() {
+            const container = document.getElementById('selected-personas-display');
+            container.innerHTML = selectedPersonas.map(personaId => {
+                const persona = availablePersonas[personaId];
+                return `<span class="persona-tag" onclick="showPersonaView('${personaId}')" style="cursor: pointer;">${persona.name} #${teamInstances[personaId] || 1}</span>`;
+            }).join('');
+        }
+
+                 function showWorkflowPreview() {
+             updateWorkflowSteps();
+             document.getElementById('workflow-preview').style.display = 'block';
+         }
+
+         function updateWorkflowSteps() {
+             const container = document.getElementById('workflow-steps-content');
+             const workflowOrder = ['executive', 'product-manager', 'solution-architect', 'program-manager'];
+             
+             const workflowSteps = workflowOrder.map(personaId => {
+                 if (!selectedPersonas.includes(personaId)) return null;
+                 
+                 const persona = availablePersonas[personaId];
+                 const state = personaStates[personaId];
+                 let status = 'pending';
+                 
+                 if (state.status === 'working') status = 'active';
+                 else if (state.status === 'complete') status = 'completed';
+                 else if (state.status === 'waiting') status = 'pending';
+                 
+                 return {
+                     persona: persona.name,
+                     action: getPersonaWorkflowAction(personaId),
+                     status: status,
+                     progress: state.progress
+                 };
+             }).filter(Boolean);
+             
+             container.innerHTML = workflowSteps.map((step, index) => `
+                 <div class="workflow-step">
+                     <div class="step-number ${step.status === 'completed' ? 'completed' : step.status === 'active' ? 'active' : ''}">${step.status === 'completed' ? '✓' : index + 1}</div>
+                     <div class="step-content">
+                         <strong>${step.persona}:</strong> ${step.action}
+                         ${step.status === 'active' ? `<div style="margin-top: 5px; font-size: 0.8rem; color: #8b5cf6;">Progress: ${step.progress}%</div>` : ''}
+                     </div>
+                     <div class="step-status ${step.status}">${step.status}</div>
+                 </div>
+             `).join('');
+         }
+
+         function getPersonaWorkflowAction(personaId) {
+             const actions = {
+                 'executive': 'Define vision and strategic objectives',
+                 'product-manager': 'Conduct market research and define requirements',
+                 'solution-architect': 'Create technical specifications and system design',
+                 'program-manager': 'Break down into epics and stories, create project plan',
+                 'design-buddy': 'Create user experience designs and wireframes'
+             };
+             return actions[personaId] || 'Contribute to project goals';
+         }
+
+        function updateTeamOverview() {
+            const container = document.getElementById('selected-team-overview');
+            container.innerHTML = '';
+            
+            selectedPersonas.forEach(personaId => {
+                const persona = availablePersonas[personaId];
+                const state = personaStates[personaId];
+                
+                const memberCard = document.createElement('div');
+                memberCard.className = 'team-member-card';
+                memberCard.onclick = () => showPersonaView(personaId);
+                
+                memberCard.innerHTML = `
+                    <div class="persona-avatar" style="background: ${persona.color};">${persona.shortName}</div>
+                    <div class="team-member-info">
+                        <div class="team-member-name">${persona.name} #${teamInstances[personaId] || 1}</div>
+                        <div class="team-member-status">${state.thinking.substring(0, 50)}${state.thinking.length > 50 ? '...' : ''}</div>
+                    </div>
+                    <div class="status-indicator status-${state.status}"></div>
+                `;
+                
+                container.appendChild(memberCard);
+            });
+        }
+
+        function updateProgressOverview() {
+            const container = document.getElementById('progress-overview');
+            container.innerHTML = '';
+            
+            selectedPersonas.forEach(personaId => {
+                const state = personaStates[personaId];
+                const persona = availablePersonas[personaId];
+                
+                const progressCard = document.createElement('div');
+                progressCard.className = 'progress-card';
+                progressCard.onclick = () => showPersonaView(personaId);
+                
+                progressCard.innerHTML = `
+                    <div class="progress-card-header">
+                        <div class="persona-avatar" style="background: ${persona.color};">${persona.shortName}</div>
+                        <h4>${persona.name} #${teamInstances[personaId] || 1}</h4>
+                        <div class="progress-percentage">${state.progress}%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${state.progress}%"></div>
+                    </div>
+                    <div class="status" style="margin-top: 10px; color: #6b7280; font-size: 0.9rem;">
+                        ${state.thinking}
+                    </div>
+                `;
+                
+                container.appendChild(progressCard);
+            });
+        }
+
+        // Preview functionality
+        function showPreview(event, personaId) {
+            const tooltip = document.getElementById(`preview-${personaId}`);
+            if (!tooltip) return;
+            
+            const state = personaStates[personaId];
+            
+            // Update preview content
+            document.getElementById(`preview-${personaId}-content`).textContent = state.thinking;
+            
+            tooltip.classList.add('show');
+        }
+
+        function hidePreview() {
+            document.querySelectorAll('.preview-tooltip').forEach(tooltip => {
+                tooltip.classList.remove('show');
+            });
+        }
+
+        function addMessage(sender, content, type = 'ai') {
+            const chatMessages = document.getElementById('chat-messages');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.innerHTML = `
+                <div class="message-header">${sender}</div>
+                ${content}
+            `;
+            chatMessages.appendChild(message);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function submitExecutiveIdea() {
+            const input = document.getElementById('executive-input');
+            const idea = input.value.trim();
+            
+            if (!idea) return;
+            
+            // Store the project description
+            currentProject = idea;
+            document.getElementById('project-description').textContent = idea;
+            
+            // Add user message
+            addMessage('Executive', idea, 'user');
+            input.value = '';
+            
+            // Update button text
+            document.getElementById('submit-idea-btn').textContent = 'Processing...';
+            document.getElementById('submit-idea-btn').disabled = true;
+            
+            // Simulate AI processing for action plan
+            setTimeout(() => {
+                generateActionPlan(idea);
+            }, 1500);
+        }
+
+        function generateActionPlan(idea) {
+            // Simulate calling backend for executive AI response
+            const actionPlans = {
+                'product-manager': 'Conduct comprehensive market research, analyze competitors, define target user personas, and create detailed product requirements document with functional specifications',
+                'solution-architect': 'Review functional requirements, design scalable system architecture, create technical specifications, define technology stack, and develop implementation strategy',
+                'program-manager': 'Break down requirements into manageable epics and user stories, create detailed project timeline with milestones, set up task tracking system, and establish team coordination processes',
+                'design-buddy': 'Research user experience best practices, create detailed user journey maps, design intuitive wireframes and mockups, and establish comprehensive design system guidelines'
+            };
+            
+            actionPlan = {
+                overview: `Based on your vision: "${idea}", I've created a comprehensive execution strategy that leverages each team member's expertise:`,
+                tasks: selectedPersonas.filter(p => p !== 'executive').map(personaId => ({
+                    persona: availablePersonas[personaId].name,
+                    task: actionPlans[personaId] || 'Collaborate with team to support project goals',
+                    instanceId: teamInstances[personaId]
+                }))
+            };
+            
+            const planContent = `
+                <p style="margin-bottom: 20px;">${actionPlan.overview}</p>
+                <div style="background: white; border-radius: 8px; padding: 20px;">
+                    <h5 style="color: #1f2937; margin-bottom: 15px;">Execution Plan:</h5>
+                    <ul style="list-style: none; padding: 0;">
+                        ${actionPlan.tasks.map((task, index) => 
+                            `<li style="padding: 15px 0; border-bottom: 1px solid #f3f4f6; ${index === actionPlan.tasks.length - 1 ? 'border-bottom: none;' : ''}">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <div class="persona-avatar" style="background: ${availablePersonas[Object.keys(availablePersonas).find(id => availablePersonas[id].name === task.persona)].color}; width: 24px; height: 24px; font-size: 0.7rem;">
+                                        ${availablePersonas[Object.keys(availablePersonas).find(id => availablePersonas[id].name === task.persona)].shortName}
+                                    </div>
+                                    <strong style="color: #1f2937;">${task.persona} #${task.instanceId}:</strong>
+                                </div>
+                                <p style="color: #6b7280; margin-left: 34px; line-height: 1.5;">${task.task}</p>
+                            </li>`
+                        ).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('action-plan-content').innerHTML = planContent;
+            document.getElementById('action-plan-section').style.display = 'block';
+            
+            // Re-enable input
+            document.getElementById('submit-idea-btn').textContent = 'Share Vision';
+            document.getElementById('submit-idea-btn').disabled = false;
+            
+            addMessage('Executive AI', 'I\'ve analyzed your vision and created a comprehensive action plan. Please review the execution strategy below and give the green light when you\'re ready to proceed.');
+        }
+
+        function refineActionPlan() {
+            addMessage('Executive AI', 'Please describe what you\'d like to change about the current plan, and I\'ll refine the strategy accordingly.');
+            
+            // Re-enable input for refinement
+            const input = document.getElementById('executive-input');
+            input.placeholder = 'Describe changes to the action plan...';
+            input.focus();
+            
+            // Update button text
+            document.getElementById('submit-idea-btn').textContent = 'Refine Plan';
+        }
+
+        function approveActionPlan() {
+            addMessage('Executive', 'Action plan approved. Green light given to the team! Let\'s bring this vision to life.', 'user');
+            addMessage('Executive AI', 'Excellent! I\'m now delegating tasks to your team. Each member will begin their specialized work according to the execution plan. Moving to the execution dashboard...');
+            
+            // Hide action plan section
+            document.getElementById('action-plan-section').style.display = 'none';
+            
+            setTimeout(() => {
+                showView('overview');
+                startProjectExecution();
+            }, 2000);
+        }
+
+        function startProjectExecution() {
+            // Show active project section
+            document.getElementById('active-project-section').style.display = 'block';
+            
+            // Update team overview
+            updateTeamOverview();
+            
+            // Set up dependencies and start workflow
+            setupWorkflowDependencies();
+            
+            // Start execution simulation
+            simulateExecutiveWorkflow();
+        }
+
+        function setupWorkflowDependencies() {
+            // Define the sequential workflow dependencies
+            const dependencies = {
+                'executive': [],
+                'product-manager': ['executive'],
+                'solution-architect': ['product-manager'],
+                'program-manager': ['solution-architect'],
+                'design-buddy': ['product-manager'] // Can work in parallel with solution architect
+            };
+            
+            // Set up dependency tracking
+            selectedPersonas.forEach(personaId => {
+                const deps = dependencies[personaId] || [];
+                personaStates[personaId].dependencies = deps.map(dep => availablePersonas[dep]?.name).filter(Boolean);
+            });
+        }
+
+        function simulateExecutiveWorkflow() {
+            // Start with executive setting the vision
+            updatePersonaStatus('executive', 'working', 'Creating strategic vision and defining project objectives...');
+            
+            // Set other personas to waiting
+            selectedPersonas.forEach(personaId => {
+                if (personaId !== 'executive') {
+                    updatePersonaStatus(personaId, 'waiting', `Waiting for ${personaStates[personaId].dependencies.join(', ')} to complete...`);
+                }
+            });
+            
+            // Simulate executive work
+            simulatePersonaWork('executive', () => {
+                // Executive completes, now product manager can start
+                if (selectedPersonas.includes('product-manager')) {
+                    personaStates['product-manager'].dependencies = [];
+                    updatePersonaStatus('product-manager', 'working', 'Conducting market research and defining detailed requirements...');
+                    
+                    simulatePersonaWork('product-manager', () => {
+                        // Product manager completes, now solution architect and design buddy can start
+                        if (selectedPersonas.includes('solution-architect')) {
+                            personaStates['solution-architect'].dependencies = [];
+                            updatePersonaStatus('solution-architect', 'working', 'Creating technical architecture and system design...');
+                            
+                            simulatePersonaWork('solution-architect', () => {
+                                // Solution architect completes, program manager can start
+                                if (selectedPersonas.includes('program-manager')) {
+                                    personaStates['program-manager'].dependencies = [];
+                                    updatePersonaStatus('program-manager', 'working', 'Creating project timeline and breaking down into JIRA epics and stories...');
+                                    
+                                    simulatePersonaWork('program-manager', () => {
+                                        addMessage('System', '🎉 All team members have completed their specialized work! Your vision is now ready for development implementation.', 'system');
+                                    });
+                                }
+                            });
+                        }
+                        
+                        if (selectedPersonas.includes('design-buddy')) {
+                            personaStates['design-buddy'].dependencies = [];
+                            updatePersonaStatus('design-buddy', 'working', 'Creating user experience designs and comprehensive wireframes...');
+                            
+                            simulatePersonaWork('design-buddy', () => {
+                                // Design buddy work is complete
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        
+
+                 function updatePersonaStatus(personaId, status, thinking) {
+             personaStates[personaId].status = status;
+             personaStates[personaId].thinking = thinking;
+             
+             // Update sidebar status
+             const statusElement = document.getElementById(`${personaId}-status`);
+             if (statusElement) {
+                 statusElement.textContent = thinking.substring(0, 30) + (thinking.length > 30 ? '...' : '');
+             }
+             
+             // Update status indicator
+             const indicator = document.getElementById(`${personaId}-indicator`);
+             if (indicator) {
+                 indicator.className = `status-indicator status-${status}`;
+             }
+             
+             // Update preview content
+             const previewContent = document.getElementById(`preview-${personaId}-content`);
+             if (previewContent) {
+                 previewContent.textContent = thinking;
+             }
+             
+             // Update persona view if currently viewing
+             if (currentView === `${personaId}-persona`) {
+                 updatePersonaView(personaId);
+             }
+             
+             // Update progress overview and team overview
+             updateProgressOverview();
+             updateTeamOverview();
+             
+             // Update workflow steps if in chat view
+             if (currentView === 'chat') {
+                 updateWorkflowSteps();
+             }
+         }
+
+        function resetWorkflow() {
+            // Reset all state
+            selectedPersonas = [];
+            actionPlan = null;
+            executionProgress = {};
+            currentProject = null;
+            teamInstances = {};
+            
+            // Reset persona states
+            initializePersonaStates();
+            
+            // Clear UI
+            document.querySelectorAll('.persona-card').forEach(card => card.classList.remove('selected'));
+            
+            // Clear chat
+            document.getElementById('chat-messages').innerHTML = `
+                <div class="message system">
+                    <div class="message-header">System</div>
+                    Team assembled and ready. Please share your vision or idea to get started.
+                </div>
+            `;
+            
+            // Hide sections
+            document.getElementById('action-plan-section').style.display = 'none';
+            document.getElementById('active-project-section').style.display = 'none';
+            document.getElementById('chat-nav').style.display = 'none';
+            document.getElementById('workflow-preview').style.display = 'none';
+            
+            // Reset input
+            document.getElementById('executive-input').placeholder = 'Describe your vision, idea, or project in detail...';
+            document.getElementById('executive-input').value = '';
+            document.getElementById('proceed-to-chat').disabled = true;
+            document.getElementById('submit-idea-btn').textContent = 'Share Vision';
+            document.getElementById('submit-idea-btn').disabled = false;
+            
+            // Clear sidebar
+            document.getElementById('persona-sidebar').innerHTML = '<h4 style="color: #6b7280; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 15px 10px; font-weight: 600;">Team Members</h4>';
+            
+            // Clear persona views
+            document.getElementById('persona-views-container').innerHTML = '';
+            
+            // Return to overview
+            showView('overview');
+        }
+
+                 // Notification system
+         function showNotification(message, type = 'success') {
+             const notification = document.getElementById('notification');
+             const content = document.getElementById('notification-content');
+             
+             content.textContent = message;
+             notification.className = `notification ${type}`;
+             notification.classList.add('show');
+             
+             setTimeout(() => {
+                 notification.classList.remove('show');
+             }, 4000);
+         }
+
+         // Enhanced persona work simulation with notifications
+         function simulatePersonaWork(personaId, onComplete) {
+             const workflowSteps = {
+                 'executive': [
+                     'Analyzing project scope and market potential...',
+                     'Defining strategic objectives and success metrics...',
+                     'Creating high-level project vision document...',
+                     'Establishing project priorities and constraints...',
+                     'Finalizing executive briefing and direction...',
+                     'Executive vision complete! Ready to guide the team.'
+                 ],
+                 'product-manager': [
+                     'Conducting comprehensive market research...',
+                     'Analyzing competitor landscape and opportunities...',
+                     'Defining target user personas and segments...',
+                     'Creating detailed functional requirements...',
+                     'Documenting product specifications and acceptance criteria...',
+                     'Product requirements complete! Ready for technical design.'
+                 ],
+                 'solution-architect': [
+                     'Reviewing functional requirements and constraints...',
+                     'Designing scalable system architecture...',
+                     'Selecting optimal technology stack...',
+                     'Creating technical specifications and API design...',
+                     'Developing implementation roadmap and phases...',
+                     'Technical architecture complete! Ready for project planning.'
+                 ],
+                 'program-manager': [
+                     'Breaking down requirements into manageable epics...',
+                     'Creating detailed user stories with acceptance criteria...',
+                     'Establishing project timeline and milestones...',
+                     'Setting up task tracking and team coordination...',
+                     'Defining resource allocation and capacity planning...',
+                     'Project plan complete! Ready for development team assignment.'
+                 ],
+                 'design-buddy': [
+                     'Researching user experience best practices...',
+                     'Creating detailed user journey maps...',
+                     'Designing intuitive wireframes and user flows...',
+                     'Developing high-fidelity mockups and prototypes...',
+                     'Establishing design system and component library...',
+                     'Design specifications complete! Ready for development.'
+                 ]
+             };
+             
+             const steps = workflowSteps[personaId] || [
+                 'Starting analysis...',
+                 'Processing requirements...',
+                 'Creating deliverables...',
+                 'Finalizing work...',
+                 'Task completed!'
+             ];
+             
+             let currentStepIndex = 0;
+             
+             const interval = setInterval(() => {
+                 const progress = Math.round(((currentStepIndex + 1) / steps.length) * 100);
+                 personaStates[personaId].progress = progress;
+                 
+                 // Update thinking based on current step
+                 let thinking = steps[currentStepIndex];
+                 if (currentStepIndex === steps.length - 1) {
+                     updatePersonaStatus(personaId, 'complete', thinking);
+                     showNotification(`${availablePersonas[personaId].name} has completed their work!`, 'success');
+                 } else {
+                     updatePersonaStatus(personaId, 'working', thinking);
+                 }
+                 
+                 // Add chat message for major milestones
+                 if (currentStepIndex === 0) {
+                     addMessage(`${availablePersonas[personaId].name} #${teamInstances[personaId]}`, `🚀 Starting work: ${thinking}`, 'ai');
+                 } else if (currentStepIndex === steps.length - 1) {
+                     addMessage(`${availablePersonas[personaId].name} #${teamInstances[personaId]}`, `✅ ${thinking}`, 'ai');
+                 }
+                 
+                 currentStepIndex++;
+                 
+                 if (currentStepIndex >= steps.length) {
+                     clearInterval(interval);
+                     if (onComplete) onComplete();
+                 }
+             }, 2000 + Math.random() * 2000); // Random timing between 2-4 seconds
+         }
+
+         // Initialize the app
+         document.addEventListener('DOMContentLoaded', function() {
+             console.log('Executive AI Team Management Platform initialized');
+             initializePersonaStates();
+             
+             // Auto-select executive if starting fresh
+             if (selectedPersonas.length === 0) {
+                 selectedPersonas.push('executive');
+             }
+         });
+    </script>
+</body>
+</html>
