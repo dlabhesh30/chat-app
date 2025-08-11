@@ -375,7 +375,7 @@
     }
     
     .active-personas {
-      display: flex;
+      display: none; /* hidden; exposed via Team dropdown */
       gap: 8px;
       flex-wrap: wrap;
     }
@@ -422,6 +422,7 @@
       color: white;
       border-color: #ff3b30;
     }
+    .action-btn.active { background: #007aff; color: #fff; border-color: #007aff; }
     
     .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .chip { background: #007aff; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 500; }
@@ -831,6 +832,13 @@
       <div class="sidebar-header">
         <h2>StartupSuite</h2>
         <p style="color: #6b7280; font-size: 0.8rem;">AI Team Platform</p>
+        <div style="margin-top:12px; padding-top:12px; border-top: 1px solid rgba(0,0,0,0.06);">
+          <label class="toolbar-label" style="display:block; margin-bottom:6px;">Project</label>
+          <select id="project-selector" class="project-selector" style="width:100%;">
+            <option value="">Select Project...</option>
+            <option value="new">+ New Project</option>
+          </select>
+        </div>
       </div>
       <div class="sidebar-nav">
         <div class="nav-item active" data-view="overview">📊 Dashboard</div>
@@ -844,23 +852,7 @@
       <div class="top-header">
         <h1 id="view-title">Dashboard</h1>
         <div class="header-toolbar">
-          <div class="toolbar-group">
-            <span class="toolbar-label">Project</span>
-            <select id="project-selector" class="project-selector">
-              <option value="">Select Project...</option>
-              <option value="new">+ New Project</option>
-            </select>
-          </div>
-          <div class="toolbar-group">
-            <span class="toolbar-label">Instances</span>
-            <div class="toolbar-chips" id="toolbar-instances"></div>
-          </div>
-          <div class="toolbar-group">
-            <span class="toolbar-label">Tasks</span>
-            <div class="toolbar-chips" id="toolbar-tasks"></div>
-          </div>
           <div style="flex:1 1 auto"></div>
-          <button class="header-btn" id="btn-new">New Project</button>
           <button class="header-btn" id="btn-settings">Settings</button>
         </div>
       </div>
@@ -904,13 +896,17 @@
           <!-- Executive Chat -->
           <div class="view" id="chat-view">
             <div class="chat-interface">
-              <div class="chat-header">
-                <div class="chat-controls">
+                <div class="chat-header">
+                  <div class="chat-controls">
                   <div class="active-personas" id="active-personas">
-                    <!-- Persona chips will be rendered here -->
+                    <!-- Persona chips are now shown via Team dropdown -->
                   </div>
+                  <button class="action-btn" id="btn-team-toggle" title="Show team"><span>👥</span> Team (<span id="team-count">0</span>) ▾</button>
                   <div class="chat-actions">
-                    <button class="action-btn" id="btn-broadcast" title="Send update to all linked personas">
+                    <button class="action-btn" id="btn-view-plan" title="View action plan" style="display:none;">
+                      <span>📋</span> View Plan
+                    </button>
+                    <button class="action-btn" id="btn-broadcast" title="Use main chat to broadcast to your team">
                       <span>📢</span> Broadcast
                     </button>
                     <button class="action-btn danger" id="btn-interrupt" title="Interrupt current work">
@@ -1012,6 +1008,51 @@
     </div>
   </div>
   
+  <!-- New Project Modal -->
+  <div class="broadcast-modal" id="new-project-modal">
+    <div class="broadcast-content">
+      <div class="broadcast-header">
+        <h3>Create New Project</h3>
+        <button class="close-btn" onclick="closeNewProjectModal()">&times;</button>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-size: 0.875rem; font-weight: 600; color: #1d1d1f; margin-bottom: 8px;">Project Name</label>
+        <input id="new-project-name" placeholder="Enter project name" style="width:100%; height:40px; padding: 8px 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: inherit; font-size: 0.9rem;" />
+      </div>
+      <div style="display:flex; gap:12px; justify-content:flex-end;">
+        <button class="btn btn-secondary" onclick="closeNewProjectModal()">Cancel</button>
+        <button class="btn" onclick="confirmCreateProject()">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Choose Project Modal -->
+  <div class="broadcast-modal" id="choose-project-modal">
+    <div class="broadcast-content">
+      <div class="broadcast-header">
+        <h3>Select or Create Project</h3>
+        <button class="close-btn" onclick="closeChooseProjectModal()">&times;</button>
+      </div>
+      <div style="display:flex; flex-direction: column; gap:16px;">
+        <div>
+          <label style="display:block; font-size: 0.875rem; font-weight: 600; color: #1d1d1f; margin-bottom: 8px;">Existing Project</label>
+          <select id="choose-existing-project" class="project-selector" style="width:100%;">
+            <option value="">Select existing project...</option>
+          </select>
+        </div>
+        <div style="text-align:center; color:#9ca3af; font-size: 0.8rem;">— or —</div>
+        <div>
+          <label style="display:block; font-size: 0.875rem; font-weight: 600; color: #1d1d1f; margin-bottom: 8px;">New Project Name</label>
+          <input id="choose-new-project-name" placeholder="Enter new project name" style="width:100%; height:40px; padding: 8px 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: inherit; font-size: 0.9rem;" />
+        </div>
+        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:4px;">
+          <button class="btn btn-secondary" onclick="closeChooseProjectModal()">Cancel</button>
+          <button class="btn" onclick="confirmChooseProject()">Continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
 
 
   <script>
@@ -1035,6 +1076,8 @@
     let currentActivePersona = null; // Currently selected persona for chat
     let workflowInterrupted = false;
     let workflowTimers = {}; // Store active timers for interruption
+    let broadcastMode = false; // Use main chat input to broadcast to team
+    let teamExpanded = false; // Toggle for team dropdown
 
     Object.keys(personas).forEach(id => {
       personaStates[id] = { status: 'idle', thinking: 'Ready to contribute to the project...', progress: 0, dependencies: [], deliverables: [] };
@@ -1177,21 +1220,19 @@
     }
 
     function renderSelectedTeam() {
-      // Render active personas in chat header
-      const activePersonasContainer = byId('active-personas');
-      if (activePersonasContainer) {
-        activePersonasContainer.innerHTML = selectedPersonas.map(pid => 
-          `<span class="persona-chip ${currentActivePersona === pid ? 'active' : ''}" 
-                 data-persona="${pid}" onclick="switchToPersona('${pid}')">${personas[pid].name}</span>`
-        ).join('');
-      }
-      
-      // Legacy team chips (hidden by default)
+      // Update Team toggle count
+      const teamCountEl = document.querySelector('#btn-team-toggle #team-count');
+      if (teamCountEl) teamCountEl.textContent = String(selectedPersonas.length);
+
+      // Team chips in dropdown
       const teamChips = byId('selected-team-chips');
       if (teamChips) {
-        teamChips.innerHTML = selectedPersonas.map(pid => `<span class="chip">${personas[pid].name}</span>`).join('');
+        teamChips.innerHTML = selectedPersonas.map(pid => `<span class="chip" data-persona="${pid}">${personas[pid].name}</span>`).join('');
+        teamChips.querySelectorAll('[data-persona]').forEach(chip => {
+          chip.addEventListener('click', () => switchToPersona(chip.dataset.persona));
+        });
       }
-      
+
       renderToolbar();
       renderLinkedChips();
     }
@@ -1220,21 +1261,17 @@
       input.placeholder = `Ask ${personas[personaId].name} a follow-up question...`;
     }
     
-    function openBroadcastModal() {
-      const modal = byId('broadcast-modal');
-      const personasContainer = byId('broadcast-personas');
-      
-      // Populate persona checkboxes
-      personasContainer.innerHTML = selectedPersonas.map(pid => `
-        <div class="persona-checkbox" onclick="togglePersonaSelection('${pid}')">
-          <input type="checkbox" id="broadcast-${pid}" />
-          <label for="broadcast-${pid}" style="cursor: pointer; font-size: 0.875rem; color: #1d1d1f;">
-            ${personas[pid].name}
-          </label>
-        </div>
-      `).join('');
-      
-      modal.style.display = 'flex';
+    function updateBroadcastButton() {
+      const btn = byId('btn-broadcast');
+      if (!btn) return;
+      btn.classList.toggle('active', broadcastMode);
+      btn.innerHTML = broadcastMode ? '<span>📢</span> Broadcast On' : '<span>📢</span> Broadcast';
+      btn.title = broadcastMode ? 'Broadcast mode is ON' : 'Use main chat to broadcast to your team';
+    }
+
+    function toggleBroadcastMode() {
+      broadcastMode = !broadcastMode;
+      updateBroadcastButton();
     }
     
     function closeBroadcastModal() {
@@ -1255,22 +1292,12 @@
       container.classList.toggle('selected', checkbox.checked);
     }
     
-    function sendBroadcast() {
-      const message = byId('broadcast-message').value.trim();
-      if (!message) return;
-      
-      const selectedPersonaIds = [];
-      document.querySelectorAll('.persona-checkbox input:checked').forEach(cb => {
-        selectedPersonaIds.push(cb.id.replace('broadcast-', ''));
-      });
-      
-      if (selectedPersonaIds.length === 0) return;
-      
-      // Send the message to selected personas
-      selectedPersonaIds.forEach(pid => {
+    function sendBroadcastFromInput(message) {
+      const targets = selectedPersonas.filter(pid => pid !== 'executive');
+      if (targets.length === 0) return;
+
+      targets.forEach(pid => {
         addPersonaMessage(pid, 'Broadcast Update', message, 'user');
-        
-        // Simulate persona acknowledging the update
         setTimeout(() => {
           const responses = {
             'product-manager': `Thank you for the update! I'll revise my **Product Requirements Document** and **Market Analysis** to incorporate this new information. This will help ensure our deliverables stay aligned with the latest insights.`,
@@ -1279,16 +1306,11 @@
             'design-buddy': `Great insight! I'll revise the **User Journey Maps** and **UI Wireframes** based on this update. This will help create a better user experience aligned with the new direction.`,
             'executive': `Excellent strategic update! I'll incorporate this into our **Project Vision** and **Strategic Brief** to ensure all team deliverables remain aligned with our business objectives.`
           };
-          
           const response = responses[pid] || `Update acknowledged! I'll revise my deliverables to incorporate this new information.`;
           addPersonaMessage(pid, personas[pid].name, response, 'ai');
         }, 1000 + Math.random() * 2000);
       });
-      
-      // Show confirmation in main chat
-      addMessage('System', `Update broadcasted to ${selectedPersonaIds.length} persona(s): ${selectedPersonaIds.map(pid => personas[pid].name).join(', ')}`, 'system');
-      
-      closeBroadcastModal();
+      addMessage('System', `Update broadcasted to ${targets.length} persona(s): ${targets.map(pid => personas[pid].name).join(', ')}`, 'system');
     }
     
     function interruptWorkflow() {
@@ -1311,6 +1333,7 @@
       byId('interrupt-controls').style.display = 'block';
       
       addMessage('System', '⏸️ Workflow interrupted. All personas have paused their current work.', 'system');
+      updateInterruptButton();
     }
     
     function resumeWork() {
@@ -1327,6 +1350,7 @@
           simulatePersonaWork(pid);
         }
       });
+      updateInterruptButton();
     }
     
     function modifyAndResend() {
@@ -1346,18 +1370,23 @@
       byId('executive-input').placeholder = 'Describe your revised idea or project...';
       
       addMessage('System', '🔄 Workflow reset. You can now provide new instructions to the team.', 'system');
+      updateInterruptButton();
     }
     
     function openBroadcastFromPersona(personaId) {
-      // Pre-select the current persona's linked personas
-      openBroadcastModal();
-      
-      // Auto-populate message context
-      const messageInput = byId('broadcast-message');
-      messageInput.placeholder = `Share an update from ${personas[personaId].name} with linked personas...`;
-      messageInput.value = `Update from ${personas[personaId].name}: `;
-      messageInput.focus();
-      messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length);
+      // Enable broadcast mode and move focus to main chat input with helpful prefix
+      broadcastMode = true; updateBroadcastButton();
+      const input = byId('executive-input');
+      if (input) {
+        input.placeholder = `Share an update from ${personas[personaId].name} with your team...`;
+        input.value = `Update from ${personas[personaId].name}: `;
+        input.focus();
+        const len = input.value.length; input.setSelectionRange(len, len);
+      }
+      // Ensure chat view is visible
+      showView('chat');
+      // Ensure broadcast mode is off for planning flow
+      broadcastMode = false; updateBroadcastButton();
     }
     
     function clearPersonaChat(personaId) {
@@ -1386,6 +1415,7 @@
     function renderToolbar() {
       const instC = byId('toolbar-instances');
       const taskC = byId('toolbar-tasks');
+      if (!instC || !taskC) return; // header chips removed
       instC.innerHTML = instances.map(inst => `<span class="toolbar-chip" data-inst="${inst.id}">${inst.name}</span>`).join('');
       taskC.innerHTML = tasks.map(t => `<span class="toolbar-chip" data-task="${t.id}">${t.title}</span>`).join('');
       instC.querySelectorAll('[data-inst]').forEach(chip => chip.addEventListener('click', () => {
@@ -1653,29 +1683,90 @@
       selector.innerHTML += '<option value="new">+ New Project</option>';
     }
 
-    function createNewProject() {
-      const projectName = prompt('Enter project name:');
+    function openChooseProjectModal() {
+      const modal = byId('choose-project-modal');
+      if (!modal) return;
+      const select = byId('choose-existing-project');
+      const input = byId('choose-new-project-name');
+      // Populate existing projects
+      if (select) {
+        select.innerHTML = '<option value="">Select existing project...</option>' +
+          projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        select.value = '';
+      }
+      if (input) input.value = '';
+      modal.style.display = 'flex';
+      setTimeout(() => { if (select && select.options.length > 1) select.focus(); else if (input) input.focus(); }, 0);
+    }
+
+    function closeChooseProjectModal() {
+      const modal = byId('choose-project-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function confirmChooseProject() {
+      const select = byId('choose-existing-project');
+      const input = byId('choose-new-project-name');
+      const selectedId = select ? select.value : '';
+      const newName = input && input.value ? input.value.trim() : '';
+      
+      if (!selectedId && !newName) return;
+      
+      if (selectedId) {
+        const project = projects.find(p => p.id === selectedId);
+        if (project) {
+          currentProject = project;
+          selectedPersonas = [...project.personas];
+          updateProjectSelector();
+          renderSetupGrid();
+          closeChooseProjectModal();
+          showView('setup');
+        }
+        return;
+      }
+      
+      if (newName) {
+        const project = { id: 'proj_' + Date.now(), name: newName, personas: [], created: new Date().toISOString() };
+        projects.push(project);
+        currentProject = project;
+        selectedPersonas = [];
+        updateProjectSelector();
+        renderSetupGrid();
+        closeChooseProjectModal();
+        showView('setup');
+        return;
+      }
+    }
+
+    function openNewProjectModal() {
+      const modal = byId('new-project-modal');
+      if (!modal) return;
+      const input = byId('new-project-name');
+      if (input) { input.value = ''; }
+      modal.style.display = 'flex';
+      setTimeout(() => { if (input) input.focus(); }, 0);
+    }
+
+    function closeNewProjectModal() {
+      const modal = byId('new-project-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function confirmCreateProject() {
+      const input = byId('new-project-name');
+      const projectName = (input && input.value ? input.value : '').trim();
       if (!projectName) return;
-      
-      const project = {
-        id: 'proj_' + Date.now(),
-        name: projectName,
-        personas: [],
-        created: new Date().toISOString()
-      };
-      
+      const project = { id: 'proj_' + Date.now(), name: projectName, personas: [], created: new Date().toISOString() };
       projects.push(project);
       currentProject = project;
       selectedPersonas = [];
       updateProjectSelector();
+      closeNewProjectModal();
       showView('setup');
     }
 
     function switchProject(projectId) {
-      if (projectId === 'new') {
-        createNewProject();
-        return;
-      }
+      if (projectId === 'new') { openNewProjectModal(); return; }
       
       const project = projects.find(p => p.id === projectId);
       if (project) {
@@ -1697,6 +1788,14 @@
       const input = byId('executive-input'); 
       const idea = input.value.trim(); 
       if (!idea) return;
+
+      // Broadcast mode takes precedence
+      if (broadcastMode) {
+        addMessage('You', idea, 'user');
+        sendBroadcastFromInput(idea);
+        input.value = '';
+        return;
+      }
       
       // If we have an active persona, send to that persona
       if (currentActivePersona) {
@@ -1721,6 +1820,9 @@
       const html = `<p>Based on your idea: "${idea}", here's the execution plan:</p><ul>${tasksPlan.map(t => `<li><strong>${t.persona}:</strong> ${t.task}</li>`).join('')}</ul>`;
       byId('action-plan-content').innerHTML = html; byId('action-plan-section').style.display = 'block';
       addMessage('Executive AI', 'I\'ve analyzed your idea and created an action plan. Please review it below and give the green light when ready.');
+      // Show View Plan button in header controls
+      const btnViewPlan = byId('btn-view-plan');
+      if (btnViewPlan) btnViewPlan.style.display = 'inline-block';
     }
 
     function refineActionPlan() {
@@ -1729,6 +1831,8 @@
     }
 
     function approveActionPlan() {
+      // Hide the action plan panel after approval
+      byId('action-plan-section').style.display = 'none';
       addMessage('You', 'Action plan approved. Green light given to the team!', 'user');
       addMessage('Executive AI', 'Excellent! I\'m now delegating tasks to the team. Moving to execution phase.');
       setTimeout(() => { showView('overview'); startExecution(); }, 800);
@@ -1821,8 +1925,8 @@
         currentProject.personas = [...selectedPersonas];
       }
       
-      // Set first persona as active by default
-      currentActivePersona = selectedPersonas[0];
+      // Start in executive planning mode (no active persona)
+      currentActivePersona = null;
       
       showView('chat');
       // Auto-create instances and tasks linked together
@@ -1832,8 +1936,8 @@
         tasks.push({ id: `${pid}-task-${idx+1}`, personaId: pid, title: `${personas[pid].name} Chat` });
       });
       
-      // Update input placeholder for active persona
-      byId('executive-input').placeholder = `Describe your idea to ${personas[currentActivePersona].name}...`;
+      // Update input placeholder for executive planning
+      byId('executive-input').placeholder = 'Describe your idea or project...';
       
       renderToolbar(); renderLinkedChips(); renderSelectedTeam(); updateProgressOverview();
     }
@@ -1894,8 +1998,8 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Top nav
       document.querySelectorAll('.nav-item').forEach(i => i.addEventListener('click', () => showView(i.dataset.view)));
-      byId('btn-new').addEventListener('click', createNewProject);
-      byId('btn-start-project').addEventListener('click', () => showView('setup'));
+      if (byId('btn-new')) { byId('btn-new').addEventListener('click', openNewProjectModal); }
+      byId('btn-start-project').addEventListener('click', () => openChooseProjectModal());
       byId('btn-update-team').addEventListener('click', () => showView('setup'));
       byId('btn-continue-chat').addEventListener('click', () => showView('chat'));
 
@@ -1910,10 +2014,26 @@
       byId('btn-send').addEventListener('click', submitExecutiveIdea);
       byId('btn-refine').addEventListener('click', refineActionPlan);
       byId('btn-approve').addEventListener('click', approveActionPlan);
+      const btnViewPlan = byId('btn-view-plan');
+      if (btnViewPlan) btnViewPlan.addEventListener('click', () => {
+        const section = byId('action-plan-section');
+        if (section) {
+          section.style.display = 'block';
+          section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
       
       // New chat controls
-      byId('btn-broadcast').addEventListener('click', openBroadcastModal);
-      byId('btn-interrupt').addEventListener('click', interruptWorkflow);
+      byId('btn-broadcast').addEventListener('click', toggleBroadcastMode);
+      byId('btn-interrupt').addEventListener('click', () => { workflowInterrupted ? resumeWork() : interruptWorkflow() });
+      const teamToggle = byId('btn-team-toggle');
+      if (teamToggle) teamToggle.addEventListener('click', () => {
+        teamExpanded = !teamExpanded;
+        const el = byId('team-info');
+        if (el) el.style.display = teamExpanded ? 'block' : 'none';
+        const teamCountEl = document.querySelector('#btn-team-toggle #team-count');
+        if (teamCountEl) teamCountEl.textContent = String(selectedPersonas.length);
+      });
       byId('btn-reset-chat').addEventListener('click', () => {
         if (confirm('Are you sure you want to reset the chat? This will clear all messages.')) {
           resetChatMessages();
@@ -1928,9 +2048,14 @@
       byId('broadcast-modal').addEventListener('click', (e) => {
         if (e.target === byId('broadcast-modal')) closeBroadcastModal();
       });
+      // Disable legacy broadcast modal trigger entirely; broadcast now uses main chat
+      const broadcastModal = byId('broadcast-modal');
+      if (broadcastModal) broadcastModal.style.display = 'none';
 
       updateProjectSelector();
       updateDashboardView();
+      updateBroadcastButton();
+      updateInterruptButton();
     });
   </script>
 </body>
